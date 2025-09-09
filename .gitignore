@@ -1,0 +1,9 @@
+# Ignore only 
+/connect.php
+
+# Allow the versioned copy 
+!/database/connect.php
+
+node_modules
+
+.env

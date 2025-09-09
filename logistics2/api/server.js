@@ -1,0 +1,87 @@
+import express from "express";
+import mysql from "mysql2";
+import bodyParser from "body-parser";
+import cors from "cors";
+import md5 from "md5";
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+
+// Connect MySQL (XAMPP)
+const db = mysql.createConnection({
+  host: "localhost",
+  user: "root",   // default XAMPP user
+  password: "",   // default empty password
+  database: "tnvs",
+});
+
+db.connect(err => {
+  if (err) throw err;
+  console.log("✅ MySQL Connected...");
+});
+
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  const hashedPassword = md5(password); // hash the input password
+
+  db.query(
+    "SELECT * FROM users WHERE email = ? AND password = ? LIMIT 1",
+    [email, hashedPassword],
+    (err, results) => {
+      if (err) return res.json({ success: false, message: "DB error" });
+      if (results.length === 0) return res.json({ success: false, message: "Invalid credentials" });
+      const user = results[0];
+      res.json({
+        success: true,
+        user_id: user.user_id,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        role: user.role,
+      });
+    }
+  );
+});
+
+app.get("/assigned-customers/:user_id", (req, res) => {
+  const { user_id } = req.params;
+  // Get driver's name
+  db.query(
+    "SELECT firstname, lastname FROM users WHERE user_id = ? LIMIT 1",
+    [user_id],
+    (err, users) => {
+      if (err || users.length === 0) return res.json([]);
+      const driverName = users[0].firstname + ' ' + users[0].lastname;
+      // Fetch reservations where this driver is assigned
+      const sql = `
+        SELECT 
+          vr.reservation_ref,
+          vr.requester_name AS customer_name,
+          u.firstname AS customer_firstname,
+          u.lastname AS customer_lastname,
+          vr.pickup_location, 
+          vr.dropoff_location,
+          vr.status,
+          v.vehicle_plate,
+          v.car_brand,
+          v.model
+        FROM vehicle_reservations vr
+        JOIN vehicles v ON vr.vehicle_registration_id = v.registration_id
+        JOIN users u ON vr.user_id = u.user_id
+        WHERE vr.assigned_driver = ?
+        ORDER BY vr.pickup_datetime DESC
+      `;
+      db.query(sql, [driverName], (err2, results) => {
+        if (err2) return res.json({ success: false, message: "DB error" });
+        res.json(results);
+      });
+    }
+  );
+});
+
+const PORT = 5000;
+const HOST = '0.0.0.0'; // Listen on all network interfaces
+
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running at http://${HOST}:${PORT}`);
+});

@@ -1,0 +1,48 @@
+/*map modal styles*/
+.map-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+  .map-modal { background: #fff; width: 95%; max-width: 900px; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
+  .map-modal-header { padding: 10px 12px; border-bottom: 1px solid #eee; display:flex; align-items:center; justify-content: space-between; }
+  .map-modal-body { padding: 10px 12px; }
+  #map { height: 400px; width: 100%; }
+  .map-actions { display:flex; gap: 8px; justify-content: flex-end; padding: 10px 12px; border-top: 1px solid #eee; }
+  .search-box { width: 100%; padding: 6px 8px; margin-bottom: 8px; }
+  .address-preview { font-size: 0.9em; color: #444; margin-top: 6px; }
+  .inline-btn { margin-left: 6px; }
+  
+/*reservation progress style*/
+.styled-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 12px;
+}
+.styled-table th, .styled-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+.styled-table th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+.progress-bar {
+    width: 100%;
+    background-color: #f3f3f3;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 8px;
+    background-color: #4caf50;
+    width: 0%;
+}
+.status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 0.9em;
+}
+.s-Pending { background-color: #ffc107; }
+.s-Approved { background-color: #007bff; }
+.s-Dispatched { background-color: #28a745; }
+.s-Completed { background-color: #6c757d; }
+.s-Cancelled { background-color: #dc3545; }
