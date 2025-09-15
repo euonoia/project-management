@@ -197,10 +197,11 @@ if ($export) {
       </div>
       <nav class="sidenav">
         <a href="index.php">Dashboard</a>
-        <a href="admin.php">Admin</a>
+        <a href="../../dispatchsystem/index.php">Reservations</a>
         <a href="history.php">History</a>
         <a href="users.php">Users</a>
         <a href="drivers.php" class="active">Drivers</a>
+         <hr style="border-color:var(--border)">
         <a href="logout.php">Logout</a>
       </nav>
     </aside>

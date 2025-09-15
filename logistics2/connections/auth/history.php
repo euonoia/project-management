@@ -215,10 +215,11 @@ if ($export) {
       </div>
       <nav class="sidenav">
         <a href="index.php">Dashboard</a>
-        <a href="admin.php">Admin</a>
+        <a href="../../dispatchsystem/index.php">Reservations</a>
         <a href="history.php" class="active">History</a>
         <a href="users.php">Users</a>
         <a href="drivers.php">Drivers</a>
+         <hr style="border-color:var(--border)">
         <a href="logout.php">Logout</a>
       </nav>
     </aside>
@@ -241,7 +242,7 @@ if ($export) {
             <?php if ($mine) : ?>
               Showing only your reservations to protect your privacy.
             <?php else: ?>
-              Admin view: Showing all reservations. Use the "Mine" toggle to filter to your own.
+              Admin view: Showing all reservations.
             <?php endif; ?>
           </div>
 
@@ -254,11 +255,8 @@ if ($export) {
                 <?php endforeach; ?>
               </select>
               <?php if ($session_role === 'admin'): ?>
-                <label class="pill" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;">
-                  <input type="checkbox" name="mine" value="1" <?php echo $mine ? 'checked' : ''; ?> style="accent-color:#3b82f6;"> Mine
-                </label>
               <?php else: ?>
-                <input type="hidden" name="mine" value="1" />
+
               <?php endif; ?>
               <button class="btn" type="submit">Apply</button>
             </form>
@@ -267,8 +265,8 @@ if ($export) {
             </div>
           </div>
 
-          <div style="max-height:560px; overflow:auto; border:1px solid var(--border); border-radius:10px">
-            <table>
+          <div class="table-responsive" style="max-height:560px; max-width:100%; overflow-x:auto; overflow-y:auto; border:1px solid var(--border); border-radius:10px">
+            <table style="width:100%; min-width:900px;">
               <thead>
                 <tr>
                   <th>Reservation Ref</th>

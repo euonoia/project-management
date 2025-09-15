@@ -155,29 +155,13 @@ try {
         </div>
       </div>
       <nav class="sidenav">
+        <a href="index.php">Dashboard</a>
         <a href="../../dispatchsystem/index.php">Reservations</a>
-        <a href="admin.php">Admin</a>
         <a href="history.php">History</a>
         <a href="users.php">Users</a>
         <a href="drivers.php">Drivers</a>
+         <hr style="border-color:var(--border)">
         <a href="../auth/logout.php">Logout</a>
-        <hr style="border-color:var(--border)">
-        <div class="dropdown modern-dropdown" tabindex="0">
-          <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false">
-            <span style="display:flex;align-items:center;gap:8px;">
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" stroke="#007bff" stroke-width="2" fill="#e6f0ff"/><path d="M7 8l3 3 3-3" stroke="#007bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span>Records</span>
-            </span>
-          </button>
-          <div class="dropdown-content modern-dropdown-content" id="dropdownContent" role="menu">
-            <?php foreach ($tables as $t): $active = ($t === $selected) ? 'active' : ''; ?>
-              <a class="<?php echo $active; ?>" href="?t=<?php echo e($t); ?>" role="menuitem">
-                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:6px;"><rect x="3" y="5" width="14" height="10" rx="2" fill="#f0f4fa" stroke="#007bff" stroke-width="1.5"/><rect x="6" y="8" width="8" height="2" rx="1" fill="#007bff"/></svg>
-                <?php echo e($t); ?>
-              </a>
-            <?php endforeach; ?>
-          </div>
-        </div>
       </nav>
     </aside>
     <div class="content-area" style="display:flex;flex-direction:column;flex:1 1 0%;min-width:0;">
@@ -201,66 +185,6 @@ try {
       <div class="card"><div class="stat"><div><div class="k"><?php echo (int)array_sum($stCounts); ?></div><div class="label">Reservations</div></div><a class="pill" href="?t=vehicle_reservations">View</a></div></div>
     </section>
       
-    <?php if ($selected): ?>
-    <section class="panel card">
-      <h2 style="margin:0 0 6px">Table: <?php echo e($selected); ?></h2>
-      <div class="toolbar">
-        <form class="search" method="get">
-          <input type="hidden" name="t" value="<?php echo e($selected); ?>" />
-          <input type="text" name="q" value="<?php echo e($kw); ?>" placeholder="Search text columns..." />
-          <select name="ps">
-            <?php foreach ([25,50,100,200] as $ps): ?>
-              <option value="<?php echo (int)$ps; ?>" <?php echo ($pageSize===$ps?'selected':''); ?>>Show <?php echo (int)$ps; ?></option>
-            <?php endforeach; ?>
-          </select>
-          <button class="btn" type="submit">Apply</button>
-        </form>
-        <div>
-          <a class="btn-ghost" href="?t=<?php echo e($selected); ?>&q=<?php echo urlencode($kw); ?>&ps=<?php echo (int)$pageSize; ?>&export=1">Export CSV</a>
-        </div>
-      </div>
-
-      <div style="max-height:560px; overflow:auto; border:1px solid var(--border); border-radius:10px">
-        <table>
-          <thead>
-            <tr>
-              <?php foreach ($columns as $c): ?>
-                <th><?php echo e($c['Field']); ?></th>
-              <?php endforeach; ?>
-            </tr>
-          </thead>
-          <tbody>
-            <?php if (empty($rows)): ?>
-              <tr><td class="muted" colspan="<?php echo max(1, count($columns)); ?>">No rows found.</td></tr>
-            <?php else: foreach ($rows as $r): ?>
-              <tr>
-                <?php foreach ($columns as $c): $f=$c['Field']; ?>
-                  <td><?php echo e(is_scalar($r[$f] ?? '') ? (string)$r[$f] : json_encode($r[$f])); ?></td>
-                <?php endforeach; ?>
-              </tr>
-            <?php endforeach; endif; ?>
-          </tbody>
-        </table>
-      </div>
-
-      <?php $maxPage = ($totalRows>0) ? (int)ceil($totalRows/$pageSize) : 1; ?>
-      <div class="toolbar" style="margin-top:10px">
-        <div class="muted">Showing <?php echo (int)min($page*$pageSize, max(0,$totalRows)); ?> of <?php echo (int)$totalRows; ?> rows</div>
-        <div>
-          <?php if ($page>1): ?>
-            <a class="btn-ghost" href="?t=<?php echo e($selected); ?>&q=<?php echo urlencode($kw); ?>&ps=<?php echo (int)$pageSize; ?>&p=<?php echo (int)($page-1); ?>">Prev</a>
-          <?php endif; ?>
-          <?php if ($page<$maxPage): ?>
-            <a class="btn-ghost" href="?t=<?php echo e($selected); ?>&q=<?php echo urlencode($kw); ?>&ps=<?php echo (int)$pageSize; ?>&p=<?php echo (int)($page+1); ?>">Next</a>
-          <?php endif; ?>
-        </div>
-      </div>
-    </section>
-    <?php endif; ?>
-
-    <?php if ($session_role !== 'admin'): ?>
-      <p class="muted" style="margin-top:14px">Tip: Elevate your account to admin to enable full management actions.</p>
-    <?php endif; ?>
   </main>
 </div>
 </body>
