@@ -157,13 +157,14 @@ try {
       <nav class="sidenav">
         <a href="../../dispatchsystem/index.php">Reservations</a>
         <a href="admin.php">Admin</a>
+        <a href="history.php">History</a>
         <a href="../auth/logout.php">Logout</a>
         <hr style="border-color:var(--border)">
         <div class="dropdown modern-dropdown" tabindex="0">
           <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false">
             <span style="display:flex;align-items:center;gap:8px;">
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" stroke="#007bff" stroke-width="2" fill="#e6f0ff"/><path d="M7 8l3 3 3-3" stroke="#007bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span>Tables</span>
+              <span>Records</span>
             </span>
           </button>
           <div class="dropdown-content modern-dropdown-content" id="dropdownContent" role="menu">
