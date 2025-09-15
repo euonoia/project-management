@@ -138,56 +138,57 @@ try {
 </head>
 <body>
 <div class="layout">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <button id="sidebarToggle" aria-label="Toggle sidebar" style="background:none;border:none;outline:none;cursor:pointer;padding:0 0 8px 0;display:flex;align-items:center;">
-        <svg id="sidebarToggleIcon" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="4" y="6" width="20" height="2.5" rx="1.25" fill="#007bff"/>
-          <rect x="4" y="13" width="20" height="2.5" rx="1.25" fill="#007bff"/>
-          <rect x="4" y="20" width="20" height="2.5" rx="1.25" fill="#007bff"/>
-        </svg>
-      </button>
-      <div class="logo">AD</div>
-      <div>
-        <h1>Admin Panel</h1>
-        <div class="subtitle"><?php echo e($dbName ?: 'Database'); ?></div>
-      </div>
-    </div>
-    <nav class="sidenav">
-      <a href="../../dispatchsystem/index.php">Reservations</a>
-      <a href="../auth/logout.php">Logout</a>
-      <hr style="border-color:var(--border)">
-      <div class="dropdown modern-dropdown" tabindex="0">
-        <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false">
-          <span style="display:flex;align-items:center;gap:8px;">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" stroke="#007bff" stroke-width="2" fill="#e6f0ff"/><path d="M7 8l3 3 3-3" stroke="#007bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span>Tables</span>
-          </span>
+  <div class="main-area">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <button id="sidebarToggle" aria-label="Toggle sidebar" style="background:none;border:none;outline:none;cursor:pointer;padding:0 0 8px 0;display:flex;align-items:center;">
+          <svg id="sidebarToggleIcon" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="6" width="20" height="2.5" rx="1.25" fill="#007bff"/>
+            <rect x="4" y="13" width="20" height="2.5" rx="1.25" fill="#007bff"/>
+            <rect x="4" y="20" width="20" height="2.5" rx="1.25" fill="#007bff"/>
+          </svg>
         </button>
-        <div class="dropdown-content modern-dropdown-content" id="dropdownContent" role="menu">
-          <?php foreach ($tables as $t): $active = ($t === $selected) ? 'active' : ''; ?>
-            <a class="<?php echo $active; ?>" href="?t=<?php echo e($t); ?>" role="menuitem">
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:6px;"><rect x="3" y="5" width="14" height="10" rx="2" fill="#f0f4fa" stroke="#007bff" stroke-width="1.5"/><rect x="6" y="8" width="8" height="2" rx="1" fill="#007bff"/></svg>
-              <?php echo e($t); ?>
-            </a>
-          <?php endforeach; ?>
+        <div class="logo">AD</div>
+        <div>
+          <h1>Admin Panel</h1>
+          <div class="subtitle"><?php echo e($dbName ?: 'Database'); ?></div>
         </div>
       </div>
-    </nav>
-  </aside>
-
-  <header class="topbar">
-    <div>
-      <div class="muted" style="font-size:14px">Welcome, <?php echo e($user_name); ?></div>
-      <div style="font-weight:800; font-size:18px; letter-spacing:.3px">System Overview</div>
-    </div>
-    <div class="userbox">
-      <span class="pill"><?php echo e(strtoupper($session_role)); ?></span>
-      <div class="avatar"><?php echo e(strtoupper(substr($user_name,0,1))); ?></div>
-    </div>
-  </header>
-
-  <main class="content">
+      <nav class="sidenav">
+        <a href="../../dispatchsystem/index.php">Reservations</a>
+        <a href="admin.php">Admin</a>
+        <a href="../auth/logout.php">Logout</a>
+        <hr style="border-color:var(--border)">
+        <div class="dropdown modern-dropdown" tabindex="0">
+          <button class="dropdown-btn" id="dropdownBtn" aria-haspopup="true" aria-expanded="false">
+            <span style="display:flex;align-items:center;gap:8px;">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;"><circle cx="10" cy="10" r="9" stroke="#007bff" stroke-width="2" fill="#e6f0ff"/><path d="M7 8l3 3 3-3" stroke="#007bff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Tables</span>
+            </span>
+          </button>
+          <div class="dropdown-content modern-dropdown-content" id="dropdownContent" role="menu">
+            <?php foreach ($tables as $t): $active = ($t === $selected) ? 'active' : ''; ?>
+              <a class="<?php echo $active; ?>" href="?t=<?php echo e($t); ?>" role="menuitem">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-right:6px;"><rect x="3" y="5" width="14" height="10" rx="2" fill="#f0f4fa" stroke="#007bff" stroke-width="1.5"/><rect x="6" y="8" width="8" height="2" rx="1" fill="#007bff"/></svg>
+                <?php echo e($t); ?>
+              </a>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      </nav>
+    </aside>
+    <div class="content-area" style="display:flex;flex-direction:column;flex:1 1 0%;min-width:0;">
+      <header class="topbar">
+        <div>
+          <div class="muted" style="font-size:14px">Welcome, <?php echo e($user_name); ?></div>
+          <div style="font-weight:800; font-size:18px; letter-spacing:.3px">System Overview</div>
+        </div>
+        <div class="userbox">
+          <span class="pill"><?php echo e(strtoupper($session_role)); ?></span>
+          <div class="avatar"><?php echo e(strtoupper(substr($user_name,0,1))); ?></div>
+        </div>
+      </header>
+      <main class="content">
    
     <section class="grid">
       <div class="card"><div class="stat"><div><div class="k"><?php echo (int)$cntUsers; ?></div><div class="label">Users</div></div><a class="pill" href="?t=users">View</a></div></div>
@@ -196,26 +197,7 @@ try {
       <div class="card"><div class="stat"><div><div class="k"><?php echo (int)$cntIns; ?></div><div class="label">Insurance</div></div><a class="pill" href="?t=vehicle_insurance">View</a></div></div>
       <div class="card"><div class="stat"><div><div class="k"><?php echo (int)array_sum($stCounts); ?></div><div class="label">Reservations</div></div><a class="pill" href="?t=vehicle_reservations">View</a></div></div>
     </section>
-       <form id="signUpForm">
-        <div id="signUpMessage"></div>
-        <div class="form-group">
-            <label for="signUpEmail">Email:</label>
-            <input type="email" id="signUpEmail" name="email" required>
-        </div>
-        <div class="form-group">
-            <label for="signUpPassword">Password:</label>
-            <input type="password" id="signUpPassword" name="password" required>
-        </div>
-        <div class="form-group">
-            <label for="firstName">First Name:</label>
-            <input type="text" id="firstName" name="firstName" required>
-        </div>
-        <div class="form-group">
-            <label for="lastName">Last Name:</label>
-            <input type="text" id="lastName" name="lastName" required>
-        </div>
-        <button type="submit">Sign Up</button>
-    </form>
+      
     <?php if ($selected): ?>
     <section class="panel card">
       <h2 style="margin:0 0 6px">Table: <?php echo e($selected); ?></h2>
@@ -278,246 +260,7 @@ try {
     <?php endif; ?>
   </main>
 </div>
-<script type="module">
-  import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js';
-  import { getAuth, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js';
-
-  const signUpForm = document.getElementById('signUpForm');
-  const signUpMsg = document.getElementById('signUpMessage');
-
-  const cfg = (typeof window !== 'undefined') ? (window.FIREBASE_CONFIG || null) : null;
-  let secondary = null;
-  if (cfg) {
-    try {
-      secondary = getApps().some(a => a.name === 'secondary') ? getApp('secondary') : initializeApp(cfg, 'secondary');
-    } catch (e) {
-      console.error('Failed to init secondary app', e);
-      secondary = null;
-    }
-  }
-
-  if (signUpForm) {
-    signUpForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (signUpMsg) { signUpMsg.textContent=''; signUpMsg.style.color=''; }
-      const email = document.getElementById('signUpEmail').value.trim();
-      const password = document.getElementById('signUpPassword').value;
-      const firstName = (document.getElementById('firstName')?.value || '').trim();
-      const lastName = (document.getElementById('lastName')?.value || '').trim();
-      if (!secondary) { if (signUpMsg) { signUpMsg.textContent='Config error. Cannot init secondary app.'; signUpMsg.style.color='red'; } return; }
-      try {
-        const auth2 = getAuth(secondary);
-        const cred = await createUserWithEmailAndPassword(auth2, email, password);
-        const uid = cred.user?.uid || '';
-        try { await signOut(auth2); } catch {}
-        const resp = await fetch('./admin_login.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'upsert_admin', uid, email, firstName, lastName })
-        });
-        const data = await resp.json().catch(() => ({}));
-        if (!resp.ok || !data.ok) {
-          throw new Error(data.error || 'Failed to save admin record');
-        }
-        if (signUpMsg) { signUpMsg.textContent = 'Admin account created successfully.'; signUpMsg.style.color = 'green'; }
-        signUpForm.reset();
-      } catch (err) {
-        if (signUpMsg) {
-          signUpMsg.textContent = (err && err.message) ? err.message : 'Failed to sign up.';
-          signUpMsg.style.color = 'red';
-        }
-      }
-    });
-  }
-</script>
 </body>
-<style>
-.sidebar {
-  transition: width 0.25s cubic-bezier(.4,0,.2,1), min-width 0.25s cubic-bezier(.4,0,.2,1), max-width 0.25s cubic-bezier(.4,0,.2,1);
-  width: 260px;
-  min-width: 220px;
-  max-width: 320px;
-  overflow: visible;
-  position: relative;
-  z-index: 200;
-}
-.sidebar.collapsed {
-  width: 56px !important;
-  min-width: 56px !important;
-  max-width: 56px !important;
-  transition: width 0.25s cubic-bezier(.4,0,.2,1), min-width 0.25s cubic-bezier(.4,0,.2,1), max-width 0.25s cubic-bezier(.4,0,.2,1);
-}
-.sidebar.collapsed .brand > *:not(#sidebarToggle),
-.sidebar.collapsed .sidenav > *:not(.dropdown),
-.sidebar.collapsed .sidenav > .dropdown > .dropdown-btn > span > span,
-.sidebar.collapsed .sidenav > a,
-.sidebar.collapsed .sidenav > hr {
-  display: none !important;
-}
-.sidebar.collapsed .logo {
-  margin-left: 0 !important;
-}
-.sidebar.collapsed .dropdown-btn {
-  justify-content: center;
-}
-.sidebar.collapsed .dropdown-content {
-  left: 56px !important;
-}
-.sidebar.collapsed .modern-dropdown-content {
-  left: 56px !important;
-}
-.sidebar.collapsed .dropdown-btn svg {
-  margin-right: 0 !important;
-}
-.sidebar.collapsed .dropdown-btn span {
-  display: none !important;
-}
-.sidebar.collapsed .dropdown-content a {
-  justify-content: center;
-}
-.sidebar.collapsed .dropdown-content a svg {
-  margin: 0 !important;
-}
-.sidebar.collapsed .dropdown-content a span {
-  display: none !important;
-}
-.sidebar.collapsed .modern-dropdown-content a {
-  justify-content: center;
-}
-.sidebar.collapsed .modern-dropdown-content a svg {
-  margin: 0 !important;
-}
-.sidebar.collapsed .modern-dropdown-content a span {
-  display: none !important;
-}
-.sidebar.collapsed .brand {
-  flex-direction: column;
-  align-items: center;
-}
-.sidebar.collapsed .logo {
-  margin: 0 auto;
-}
-.sidebar.collapsed #sidebarToggleIcon {
-  transform: rotate(180deg);
-  transition: transform 0.2s;
-}
-.sidebar #sidebarToggleIcon {
-  transition: transform 0.2s;
-}
-.sidebar .brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-.sidebar .logo {
-  font-size: 1.5em;
-  font-weight: bold;
-  color: #007bff;
-  background: #e6f0ff;
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 0;
-}
-/* ...existing code... */
-/* Sidebar toggle button hover effect */
-#sidebarToggle:hover #sidebarToggleIcon {
-  filter: drop-shadow(0 2px 6px #007bff33);
-}
-/* Responsive: hide sidebar on small screens */
-@media (max-width: 700px) {
-  .sidebar {
-    position: absolute;
-    z-index: 100;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    background: #fff;
-    box-shadow: 2px 0 12px rgba(0,0,0,0.08);
-  }
-  .sidebar.collapsed {
-    left: -56px;
-  }
-}
-
-.modern-dropdown {
-  position: relative;
-  display: block;
-  outline: none;
-}
-.modern-dropdown .dropdown-btn {
-  width: 100%;
-  background: linear-gradient(90deg,#f8fbff 0,#e6f0ff 100%);
-  border: 1px solid #d0e3ff;
-  color: #007bff;
-  text-align: left;
-  padding: 10px 18px;
-  font-size: 1.08em;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: background 0.2s, box-shadow 0.2s;
-  box-shadow: 0 1px 4px rgba(0,123,255,0.04);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.modern-dropdown .dropdown-btn:focus {
-  outline: 2px solid #007bff;
-}
-.modern-dropdown-content {
-  display: none;
-  position: absolute;
-  left: 100%;
-  top: 0;
-  min-width: 200px;
-  background: #fff;
-  border: 1.5px solid #d0e3ff;
-  box-shadow: 0 4px 16px rgba(0,123,255,0.10);
-  z-index: 1200;
-  border-radius: 10px;
-  padding: 8px 0;
-  opacity: 0;
-  transform: translateY(10px);
-  pointer-events: none;
-  transition: opacity 0.22s cubic-bezier(.4,0,.2,1), transform 0.22s cubic-bezier(.4,0,.2,1);
-}
-.modern-dropdown.open .modern-dropdown-content,
-.modern-dropdown:focus-within .modern-dropdown-content,
-.modern-dropdown:hover .modern-dropdown-content {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-.modern-dropdown-content a {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 18px;
-  color: #222;
-  text-decoration: none;
-  border-radius: 6px;
-  font-size: 1em;
-  transition: background 0.15s, color 0.15s;
-}
-.modern-dropdown-content a.active {
-  background: #e6f0ff;
-  color: #007bff;
-  font-weight: bold;
-}
-.modern-dropdown-content a:hover {
-  background: #f0f7ff;
-  color: #0056b3;
-}
-@media (min-width: 801px) {
-  .layout { grid-template-columns: auto 1fr; }
-}
-</style>
 <script>
 // Modern dropdown: click, hover, keyboard accessible
 document.addEventListener('DOMContentLoaded', function() {
