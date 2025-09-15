@@ -158,6 +158,7 @@ try {
         <a href="../../dispatchsystem/index.php">Reservations</a>
         <a href="admin.php">Admin</a>
         <a href="history.php">History</a>
+        <a href="drivers.php">Drivers</a>
         <a href="../auth/logout.php">Logout</a>
         <hr style="border-color:var(--border)">
         <div class="dropdown modern-dropdown" tabindex="0">

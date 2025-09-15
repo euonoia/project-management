@@ -217,6 +217,7 @@ if ($export) {
         <a href="index.php">Dashboard</a>
         <a href="admin.php">Admin</a>
         <a href="history.php" class="active">History</a>
+        <a href="drivers.php">Drivers</a>
         <a href="logout.php">Logout</a>
       </nav>
     </aside>
@@ -234,7 +235,7 @@ if ($export) {
       <main class="content">
 
         <section class="panel card">
-          <h2 style="margin:0 0 6px">Your Travel Records</h2>
+          <h2 style="margin:0 0 6px">Travel Records</h2>
           <div class="muted" style="margin-bottom:8px">
             <?php if ($mine) : ?>
               Showing only your reservations to protect your privacy.
