@@ -199,7 +199,8 @@ if ($export) {
         <a href="index.php">Dashboard</a>
         <a href="admin.php">Admin</a>
         <a href="history.php">History</a>
-        <a href="users.php" class="active">Drivers</a>
+        <a href="users.php">Users</a>
+        <a href="drivers.php" class="active">Drivers</a>
         <a href="logout.php">Logout</a>
       </nav>
     </aside>
