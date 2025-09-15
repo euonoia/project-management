@@ -159,5 +159,5 @@ $_SESSION['role']        = $admin['role'] ?? 'admin';
 http_response_code(200);
 echo json_encode([
     'ok' => true,
-    'redirect' => '/PM-TNVS/logistics2/connections/auth/index.php',
+    'redirect' => '/project-management/logistics2/connections/auth/index.php',
 ]);
