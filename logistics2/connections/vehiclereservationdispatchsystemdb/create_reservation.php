@@ -41,6 +41,18 @@ if ($pickup_location === '' || $dropoff_location === '') back_with_flash('error'
 if ($requester_name === '') back_with_flash('error', 'Requester required');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'create') {
+    // Generate server-side reservation ref
+function generateReservationRef($dbh) {
+    do {
+        $ref = 'VR' . date('ymdHis') . strtoupper(bin2hex(random_bytes(3)));
+        $stmt = $dbh->prepare('SELECT COUNT(*) FROM vehicle_reservations WHERE reservation_ref = ?');
+        $stmt->execute([$ref]);
+        $exists = $stmt->fetchColumn();
+    } while ($exists);
+    return $ref;
+}
+    $reservation_ref = generateReservationRef($dbh);
+
     $user_id = $_SESSION['user_id'];
     $vehicle_registration_id = $_POST['vehicle_registration_id'];
     $pickup_lat = $_POST['pickup_lat'];
@@ -51,13 +63,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'create') {
     $dropoff_address = $_POST['dropoff_address'];
 
     // Save pickup location
-    $stmt = $dbh->prepare('INSERT INTO saved_locations (user_id, vehicle_registration_id, type, latitude, longitude, address) VALUES (?, ?, "pickup", ?, ?, ?)');
-    $stmt->execute([$user_id, $vehicle_registration_id, $pickup_lat, $pickup_lng, $pickup_address]);
+    $stmt = $dbh->prepare('INSERT INTO saved_locations (user_id, vehicle_registration_id, reservation_ref, type, latitude, longitude, address) VALUES (?, ?, ?, "pickup", ?, ?, ?)');
+    $stmt->execute([$user_id, $vehicle_registration_id, $reservation_ref, $pickup_lat, $pickup_lng, $pickup_address]);
     $pickup_location_id = $dbh->lastInsertId();
 
     // Save dropoff location
-    $stmt = $dbh->prepare('INSERT INTO saved_locations (user_id, vehicle_registration_id, type, latitude, longitude, address) VALUES (?, ?, "dropoff", ?, ?, ?)');
-    $stmt->execute([$user_id, $vehicle_registration_id, $dropoff_lat, $dropoff_lng, $dropoff_address]);
+    $stmt = $dbh->prepare('INSERT INTO saved_locations (user_id, vehicle_registration_id, reservation_ref, type, latitude, longitude, address) VALUES (?, ?, ?, "dropoff", ?, ?, ?)');
+    $stmt->execute([$user_id, $vehicle_registration_id, $reservation_ref, $dropoff_lat, $dropoff_lng, $dropoff_address]);
     $dropoff_location_id = $dbh->lastInsertId();
 }
 // Parse datetimes
@@ -69,11 +81,7 @@ $pickup_datetime = $pickup_dt->format('Y-m-d H:i:s');
 $dropoff_datetime = $dropoff_dt->format('Y-m-d H:i:s');
 
 
-// Generate server-side reservation ref
-function generateReservationRef() {
-    return 'VR' . date('ymdHis') . strtoupper(bin2hex(random_bytes(3)));
-}
-$reservation_ref = generateReservationRef();
+
 
 // Use PDO ($dbh) if available (preferred). If $conn (mysqli) exists, convert to PDO-like flow.
 try {

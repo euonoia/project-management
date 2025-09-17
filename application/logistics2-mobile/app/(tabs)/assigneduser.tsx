@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Button, Modal, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import MapModal from '../../components/MapModal';
 interface Customer {
   reservation_ref: string;
   customer_name: string;
@@ -13,6 +13,10 @@ interface Customer {
   car_brand: string;
   model: string;
   status: string;
+  pickup_latitude?: number | null;
+  pickup_longitude?: number | null;
+  dropoff_latitude?: number | null;
+  dropoff_longitude?: number | null;
 }
 
 interface TravelHistoryItem {
@@ -33,6 +37,13 @@ export default function AssignedUser({ navigation }: any) {
   const [modalVisible, setModalVisible] = useState(false);
   const [history, setHistory] = useState<TravelHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [mapVisible, setMapVisible] = useState(false);
+  const [selectedPickup, setSelectedPickup] = useState('');
+  const [selectedDropoff, setSelectedDropoff] = useState('');
+  const [selectedPickupLat, setSelectedPickupLat] = useState<number | null>(null);
+  const [selectedPickupLng, setSelectedPickupLng] = useState<number | null>(null);
+  const [selectedDropoffLat, setSelectedDropoffLat] = useState<number | null>(null);
+  const [selectedDropoffLng, setSelectedDropoffLng] = useState<number | null>(null);
 
   useEffect(() => {
     let interval: any;
@@ -84,6 +95,18 @@ export default function AssignedUser({ navigation }: any) {
             <Text>Dropoff: {item.dropoff_location}</Text>
             <Text>Vehicle: {item.vehicle_plate} ({item.car_brand} {item.model})</Text>
             <Text>Status: {item.status}</Text>
+            <Button
+            title="Show Direction"
+            onPress={() => {
+              setSelectedPickup(item.pickup_location);
+              setSelectedDropoff(item.dropoff_location);
+              setSelectedPickupLat(item.pickup_latitude ?? null);
+              setSelectedPickupLng(item.pickup_longitude ?? null);
+              setSelectedDropoffLat(item.dropoff_latitude ?? null);
+              setSelectedDropoffLng(item.dropoff_longitude ?? null);
+              setMapVisible(true);
+            }}
+          />
           </View>
         )}
         ListEmptyComponent={<Text>No assigned customers found.</Text>}
@@ -92,7 +115,16 @@ export default function AssignedUser({ navigation }: any) {
         title="View Travel History"
         onPress={openTravelHistory}
       />
-
+        <MapModal
+          visible={mapVisible}
+          onClose={() => setMapVisible(false)}
+          pickup={selectedPickup}
+          dropoff={selectedDropoff}
+          pickupLat={selectedPickupLat}
+          pickupLng={selectedPickupLng}
+          dropoffLat={selectedDropoffLat}
+          dropoffLng={selectedDropoffLng}
+        />
       <Modal
         visible={modalVisible}
         animationType="slide"
