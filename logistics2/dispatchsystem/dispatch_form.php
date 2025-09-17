@@ -7,13 +7,35 @@ $stmt->execute([':id' => $id]);
 $r = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$r) { echo '<div class="muted">Reservation not found.</div>'; exit; }
 
-// Fetch driver name
+// Fetch driver name (vehicle owner). Fallback to reservation user if not found.
 $ownerName = '';
 if (!empty($r['vehicle_registration_id'])) {
-    $stmtOwner = $dbh->prepare('SELECT u.firstname, u.lastname FROM vehicles v INNER JOIN users u ON v.user_id = u.user_id WHERE v.registration_id = :reg LIMIT 1');
+    $stmtOwner = $dbh->prepare('
+       SELECT 
+    u.firstname, 
+    u.lastname, 
+    vr.vehicle_registration_id, 
+    v.vehicle_plate
+FROM vehicle_reservations vr
+INNER JOIN vehicles v 
+    ON vr.vehicle_registration_id = v.registration_id
+INNER JOIN users u 
+    ON v.user_id = u.user_id
+WHERE vr.vehicle_registration_id = :reg
+LIMIT 1;
+
+    ');
     $stmtOwner->execute([':reg' => $r['vehicle_registration_id']]);
     if ($rowOwner = $stmtOwner->fetch(PDO::FETCH_ASSOC)) {
         $ownerName = htmlspecialchars($rowOwner['firstname'] . ' ' . $rowOwner['lastname'], ENT_QUOTES, 'UTF-8');
+    }
+}
+
+if ($ownerName === '' && !empty($r['user_id'])) {
+    $stmtUser = $dbh->prepare('SELECT firstname, lastname FROM users WHERE user_id = :uid LIMIT 1');
+    $stmtUser->execute([':uid' => $r['user_id']]);
+    if ($rowUser = $stmtUser->fetch(PDO::FETCH_ASSOC)) {
+        $ownerName = htmlspecialchars($rowUser['firstname'] . ' ' . $rowUser['lastname'], ENT_QUOTES, 'UTF-8');
     }
 }
 ?>
@@ -24,10 +46,12 @@ if (!empty($r['vehicle_registration_id'])) {
         <div>
             <label>Driver</label>
             <?php if ($ownerName): ?>
+                 <input type="text" name="assigned_driver" value="<?= $ownerName ?>" readonly required />
             <?php else: ?>
                 <span class="muted">No driver assigned yet</span>
+                  <input type="text" name="assigned_driver" value="" required />
             <?php endif; ?>
-            <input type="text" name="assigned_driver" placeholder="Driver full name" value="<?= $ownerName ?>" readonly required />
+            
         </div>
         <div>
             <label>Driver Contact</label>

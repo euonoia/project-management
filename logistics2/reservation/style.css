@@ -3,7 +3,9 @@
   .map-modal { background: #fff; width: 95%; max-width: 900px; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.3); }
   .map-modal-header { padding: 10px 12px; border-bottom: 1px solid #eee; display:flex; align-items:center; justify-content: space-between; }
   .map-modal-body { padding: 10px 12px; }
-  #map { height: 400px; width: 100%; }
+  #map { width: 100%;
+  height: 350px;
+  min-height: 300px; }
   .map-actions { display:flex; gap: 8px; justify-content: flex-end; padding: 10px 12px; border-top: 1px solid #eee; }
   .search-box { width: 100%; padding: 6px 8px; margin-bottom: 8px; }
   .address-preview { font-size: 0.9em; color: #444; margin-top: 6px; }

@@ -188,7 +188,10 @@ $active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
       <button type="button" id="closeMapModal">✕</button>
     </div>
     <div class="map-modal-body">
-      <input type="text" id="mapSearch" class="search-box" placeholder="Search location and press Enter">
+      <form id="mapSearchForm" class="search-row" onsubmit="return false;">
+        <input type="search" id="mapSearch" class="search-box" placeholder="Search PH address (e.g., dominguez st, malibay, pasay city, metro manila)" autocomplete="off" enterkeyhint="search" />
+        <button type="submit" class="inline-btn" id="mapSearchBtn">Search</button>
+      </form>
       <div id="map"></div>
       <div id="selected-info" class="address-preview"><strong>Selected:</strong> <span id="address-text">Drag marker, click map, or search.</span></div>
     </div>
@@ -364,40 +367,82 @@ function submitReservation() {
   var useBtn = document.getElementById('useLocationBtn');
   var map, marker, currentMode = null; // 'pickup' or 'dropoff'
   var current = { lat: 14.5995, lng: 120.9842, address: '' };
+  var PH_BOUNDS = { south: 4.2158, west: 116.87, north: 21.3218, east: 126.60 };
+
+  function isLatLngInPH(lat, lng) {
+    return lat >= PH_BOUNDS.south && lat <= PH_BOUNDS.north && lng >= PH_BOUNDS.west && lng <= PH_BOUNDS.east;
+  }
+
+  function ensurePHQuery(q) {
+    var hasPH = /philippines|ph\b/i.test(q);
+    return hasPH ? q : (q + ', Philippines');
+  }
+
+  function setSelectedIfInPH(lat, lng, address) {
+    if (!isLatLngInPH(lat, lng)) {
+      document.getElementById('address-text').textContent = 'Selected point is outside the Philippines.';
+      alert('Please choose a location within the Philippines.');
+      return false;
+    }
+    map.setView([lat, lng], 15);
+    marker.setLatLng([lat, lng]);
+    updateLocation(lat, lng, address);
+    map.invalidateSize();
+    return true;
+  }
 
   function openModal(mode) {
-    if (!document.getElementById('vehicle_registration_id').value) {
-      alert('Please select a vehicle first.');
-      return;
-    }
-    currentMode = mode;
-    document.getElementById('mapModalTitle').textContent = mode === 'pickup' ? 'Select Pick-up Location' : 'Select Drop-off Location';
-    modal.style.display = 'flex';
-    setTimeout(function(){ initMapIfNeeded(); setTimeout(function(){ map.invalidateSize(); }, 50); }, 0);
-  }
+  // ...existing code...
+  currentMode = mode; 
+  modal.style.display = 'flex';
+  setTimeout(function(){
+    initMapIfNeeded();
+    setTimeout(function(){ if (map) map.invalidateSize(); }, 100); // <-- Ensure map redraws
+  }, 0);
+}
   function closeModal() {
     modal.style.display = 'none';
   }
 
   function initMapIfNeeded() {
     if (!map) {
-      map = L.map('map').setView([current.lat, current.lng], 13);
+      map = L.map('map', {
+        maxBounds: [[PH_BOUNDS.south, PH_BOUNDS.west],[PH_BOUNDS.north, PH_BOUNDS.east]],
+        maxBoundsViscosity: 0.8
+      }).setView([current.lat, current.lng], 13);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
       marker = L.marker([current.lat, current.lng], { draggable: true }).addTo(map);
 
       marker.on('dragend', function() {
         var ll = marker.getLatLng();
+        if (!isLatLngInPH(ll.lat, ll.lng)) {
+          alert('Please stay within the Philippines.');
+          marker.setLatLng([current.lat, current.lng]);
+          map.setView([current.lat, current.lng], map.getZoom());
+          return;
+        }
         reverseGeocode(ll.lat, ll.lng);
       });
       map.on('click', function(e) {
+        if (!isLatLngInPH(e.latlng.lat, e.latlng.lng)) {
+          alert('Please choose a location within the Philippines.');
+          return;
+        }
         marker.setLatLng(e.latlng);
         reverseGeocode(e.latlng.lat, e.latlng.lng);
       });
 
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(pos){
-          current.lat = pos.coords.latitude;
-          current.lng = pos.coords.longitude;
+          var plat = pos.coords.latitude;
+          var plng = pos.coords.longitude;
+          if (isLatLngInPH(plat, plng)) {
+            current.lat = plat;
+            current.lng = plng;
+          } else {
+            // keep default Manila center
+            console.warn('Geolocation outside PH, defaulting to Manila.');
+          }
           map.setView([current.lat, current.lng], 15);
           marker.setLatLng([current.lat, current.lng]);
           reverseGeocode(current.lat, current.lng);
@@ -408,24 +453,117 @@ function submitReservation() {
         reverseGeocode(current.lat, current.lng);
       }
 
-      document.getElementById('mapSearch').addEventListener('keyup', function(e){
-        if (e.keyCode === 13) {
-          var query = e.target.value.trim();
-          if (!query) return;
-          fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(query))
-            .then(function(res){ return res.json(); })
-            .then(function(data){
-              if (data && data.length > 0) {
-                var lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
-                var address = data[0].display_name || '';
-                map.setView([lat, lng], 15);
-                marker.setLatLng([lat, lng]);
-                updateLocation(lat, lng, address);
-              } else {
-                alert('Location not found');
-              }
-            });
+      var mapSearchInput = document.getElementById('mapSearch');
+      var mapSearchForm = document.getElementById('mapSearchForm');
+      var mapSearchBtn = document.getElementById('mapSearchBtn');
+
+      // Geocoding providers (all free/open-source backed)
+      function providerNominatimPH(query) {
+        if (!query) return Promise.reject(new Error('Empty query'));
+        document.getElementById('address-text').textContent = 'Searching...';
+        var q = ensurePHQuery(query);
+        var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&addressdetails=1&countrycodes=ph&q='
+                  + encodeURIComponent(q) + '&accept-language=en&email=logistics2-app@example.com';
+        return fetch(url)
+          .then(function(res){ if (!res.ok) throw new Error('nominatim error'); return res.json(); })
+          .then(function(data){
+            if (data && data.length > 0) {
+              var lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
+              var address = data[0].display_name || '';
+              if (!isLatLngInPH(lat, lng)) throw new Error('outside PH');
+              return setSelectedIfInPH(lat, lng, address);
+            }
+            throw new Error('no results');
+          });
+      }
+
+      function providerMapsCoPH(query) {
+        var q = ensurePHQuery(query);
+        var url = 'https://geocode.maps.co/search?country=ph&q=' + encodeURIComponent(q);
+        return fetch(url)
+          .then(function(res){ if (!res.ok) throw new Error('maps.co error'); return res.json(); })
+          .then(function(data){
+            if (data && data.length > 0) {
+              var lat = parseFloat(data[0].lat), lng = parseFloat(data[0].lon);
+              var address = data[0].display_name || '';
+              if (!isLatLngInPH(lat, lng)) throw new Error('outside PH');
+              return setSelectedIfInPH(lat, lng, address);
+            }
+            throw new Error('no results');
+          });
+      }
+
+      function providerPhotonPH(query) {
+        var q = ensurePHQuery(query);
+        var bbox = '116.87,4.2158,126.60,21.3218'; // west,south,east,north
+        var url = 'https://photon.komoot.io/api/?q=' + encodeURIComponent(q) + '&limit=5&lang=en&bbox=' + bbox;
+        return fetch(url)
+          .then(function(res){ if (!res.ok) throw new Error('photon error'); return res.json(); })
+          .then(function(data){
+            if (data && data.features && data.features.length > 0) {
+              var f = data.features[0];
+              var lng = f.geometry && f.geometry.coordinates ? parseFloat(f.geometry.coordinates[0]) : NaN;
+              var lat = f.geometry && f.geometry.coordinates ? parseFloat(f.geometry.coordinates[1]) : NaN;
+              var props = f.properties || {};
+              var parts = [];
+              if (props.name) parts.push(props.name);
+              if (props.street && parts.indexOf(props.street) === -1) parts.push(props.street);
+              if (props.city) parts.push(props.city);
+              if (props.state) parts.push(props.state);
+              parts.push('Philippines');
+              var address = parts.filter(Boolean).join(', ');
+              if (!isLatLngInPH(lat, lng)) throw new Error('outside PH');
+              return setSelectedIfInPH(lat, lng, address);
+            }
+            throw new Error('no results');
+          });
+      }
+
+      function providerOpenMeteoPH(query) {
+        var q = ensurePHQuery(query);
+        var url = 'https://geocoding-api.open-meteo.com/v1/search?name=' + encodeURIComponent(q) + '&count=5&language=en&country=PH';
+        return fetch(url)
+          .then(function(res){ if (!res.ok) throw new Error('open-meteo error'); return res.json(); })
+          .then(function(data){
+            if (data && data.results && data.results.length > 0) {
+              var r = data.results[0];
+              var lat = parseFloat(r.latitude), lng = parseFloat(r.longitude);
+              var parts = [r.name, r.admin2, r.admin1, 'Philippines'];
+              var address = parts.filter(Boolean).join(', ');
+              if (!isLatLngInPH(lat, lng)) throw new Error('outside PH');
+              return setSelectedIfInPH(lat, lng, address);
+            }
+            throw new Error('no results');
+          });
+      }
+
+      function doSearch(query) {
+        return providerNominatimPH(query)
+          .catch(function(){ return providerMapsCoPH(query); })
+          .catch(function(){ return providerPhotonPH(query); })
+          .catch(function(){ return providerOpenMeteoPH(query); })
+          .catch(function(){
+            document.getElementById('address-text').textContent = 'Location not found within the Philippines.';
+            alert('Search failed or is outside the Philippines. Please refine your query, e.g., "dominguez st, malibay, pasay city, metro manila".');
+          });
+      }
+
+      mapSearchForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        var query = mapSearchInput.value.trim();
+        doSearch(query);
+      });
+
+      mapSearchInput.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.keyCode === 13) {
+          e.preventDefault();
+          mapSearchForm.dispatchEvent(new Event('submit', {cancelable:true}));
         }
+      });
+
+      mapSearchInput.addEventListener('search', function(){
+        var q = mapSearchInput.value.trim();
+        if (q) doSearch(q);
       });
     }
   }
@@ -436,12 +574,64 @@ function submitReservation() {
   }
 
   function reverseGeocode(lat, lng) {
-    fetch('https://nominatim.openstreetmap.org/reverse?lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lng) + '&format=json')
-      .then(function(res){ return res.json(); })
+    if (!isLatLngInPH(lat, lng)) {
+      document.getElementById('address-text').textContent = 'Selected point is outside the Philippines.';
+      return;
+    }
+    var nominatimUrl = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&lat='
+      + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lng);
+    var used = false;
+
+    function setAddr(addr) {
+      used = true;
+      updateLocation(lat, lng, addr || '');
+    }
+
+    // Primary reverse: Nominatim
+    fetch(nominatimUrl)
+      .then(function(res){ if (!res.ok) throw new Error('nominatim reverse error'); return res.json(); })
       .then(function(data){
-        updateLocation(lat, lng, data && data.display_name ? data.display_name : '');
+        if (data && data.address && data.address.country_code && data.address.country_code.toLowerCase() !== 'ph') {
+          throw new Error('outside PH');
+        }
+        var addr = (data && data.display_name) || '';
+        setAddr(addr);
       })
-      .catch(function(){ updateLocation(lat, lng, ''); });
+      .catch(function(){
+        // Fallback 1: Photon reverse
+        var photonUrl = 'https://photon.komoot.io/reverse?lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lng);
+        return fetch(photonUrl)
+          .then(function(res){ if (!res.ok) throw new Error('photon reverse error'); return res.json(); })
+          .then(function(data){
+            if (used) return;
+            if (data && data.features && data.features.length > 0) {
+              var p = data.features[0].properties || {};
+              var parts = [p.name || p.street, p.city, p.state, 'Philippines'];
+              setAddr(parts.filter(Boolean).join(', '));
+            } else {
+              throw new Error('no photon reverse');
+            }
+          })
+          .catch(function(){
+            // Fallback 2: Open-Meteo reverse
+            var omUrl = 'https://geocoding-api.open-meteo.com/v1/reverse?latitude=' + encodeURIComponent(lat) + '&longitude=' + encodeURIComponent(lng) + '&language=en';
+            return fetch(omUrl)
+              .then(function(res){ if (!res.ok) throw new Error('open-meteo reverse error'); return res.json(); })
+              .then(function(data){
+                if (used) return;
+                if (data && data.results && data.results.length > 0) {
+                  var r = data.results[0];
+                  var parts = [r.name, r.admin2, r.admin1, 'Philippines'];
+                  setAddr(parts.filter(Boolean).join(', '));
+                } else {
+                  setAddr('');
+                }
+              })
+              .catch(function(){
+                if (!used) setAddr('');
+              });
+          });
+      });
   }
 
   // Public triggers
@@ -457,6 +647,7 @@ function submitReservation() {
     if (!currentMode) return;
     var veh = document.getElementById('vehicle_registration_id').value;
     if (!veh) { alert('Please select a vehicle first.'); return; }
+    if (!isLatLngInPH(current.lat, current.lng)) { alert('Selected location must be within the Philippines.'); return; }
 
     // Update reservation form fields only
     if (currentMode === 'pickup') {
