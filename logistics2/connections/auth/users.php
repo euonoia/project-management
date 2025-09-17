@@ -127,7 +127,7 @@ if ($export) {
       <nav class="sidenav">
         <a href="index.php">Dashboard</a>
         <a href="../../dispatchsystem/index.php">Reservations</a>
-        <a href="history.php">History</a>
+        <a href="history.php">Travel Records</a>
         <a href="users.php" class="active">Users</a>
         <a href="drivers.php">Drivers</a>
         <hr style="border-color:var(--border)">

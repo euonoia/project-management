@@ -198,7 +198,7 @@ if ($export) {
       <nav class="sidenav">
         <a href="index.php">Dashboard</a>
         <a href="../../dispatchsystem/index.php">Reservations</a>
-        <a href="history.php">History</a>
+        <a href="history.php">Travel Records</a>
         <a href="users.php">Users</a>
         <a href="drivers.php" class="active">Drivers</a>
          <hr style="border-color:var(--border)">
@@ -209,7 +209,7 @@ if ($export) {
       <header class="topbar">
         <div>
           <div class="muted" style="font-size:14px">Welcome, <?php echo e($session_name); ?></div>
-          <div style="font-weight:800; font-size:18px; letter-spacing:.3px">User Fleet & Insurance</div>
+          <div style="font-weight:800; font-size:18px; letter-spacing:.3px">Driver Fleet & Insurance</div>
         </div>
         <div class="userbox">
           <span class="pill"><?php echo e(strtoupper($session_role)); ?></span>
