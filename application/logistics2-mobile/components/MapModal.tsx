@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, TouchableOpacity } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
-import { ORS_API_KEY } from '@env'; // ✅ Import from .env
+import Constants from 'expo-constants';
 
 interface MapModalProps {
   visible: boolean;
@@ -28,21 +28,34 @@ export default function MapModal({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const orsApiKey = Constants.expoConfig?.extra?.orsApiKey;
+
   useEffect(() => {
-    if (!pickupLat || !pickupLng || !dropoffLat || !dropoffLng) {
-      setError('Missing coordinates for pickup/dropoff.');
-      setLoading(false);
-      return;
-    }
+    if (!pickupLat || !pickupLng || !dropoffLat || !dropoffLng) return;
 
     const fetchRoute = async () => {
       try {
         setLoading(true);
+        setError('');
 
-        const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${ORS_API_KEY}&start=${pickupLng},${pickupLat}&end=${dropoffLng},${dropoffLat}`;
-        console.log('Fetching route:', url);
+        const url = 'https://api.openrouteservice.org/v2/directions/driving-car';
 
-        const res = await fetch(url);
+        const body = {
+          coordinates: [
+            [pickupLng, pickupLat], // ORS requires [lon, lat]
+            [dropoffLng, dropoffLat],
+          ],
+        };
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            Authorization: orsApiKey || '',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+
         const data = await res.json();
 
         if (!data.routes || data.routes.length === 0) {
@@ -51,16 +64,18 @@ export default function MapModal({
           return;
         }
 
-        const coordsDecoded = data.routes[0].geometry.coordinates.map((c: [number, number]) => ({
-          latitude: c[1],
-          longitude: c[0],
-        }));
+        // ORS GeoJSON polyline
+        const geometry = data.routes[0].geometry;
+        const decoded = decodePolyline(geometry);
 
-        setCoords(coordsDecoded);
-        setLoading(false);
-      } catch (err) {
-        console.error(err);
-        setError('Failed to fetch route.');
+        if (decoded.length > 0) {
+          setCoords(decoded);
+        } else {
+          setError('Failed to decode route.');
+        }
+      } catch (err: any) {
+        setError('Error fetching route: ' + err.message);
+      } finally {
         setLoading(false);
       }
     };
@@ -68,16 +83,53 @@ export default function MapModal({
     fetchRoute();
   }, [pickupLat, pickupLng, dropoffLat, dropoffLng]);
 
+  // Decode ORS polyline
+  function decodePolyline(encoded: string, precision = 5) {
+    let index = 0,
+      lat = 0,
+      lng = 0,
+      coordinates: { latitude: number; longitude: number }[] = [];
+    const factor = Math.pow(10, precision);
+
+    while (index < encoded.length) {
+      let b,
+        shift = 0,
+        result = 0;
+      do {
+        b = encoded.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      const deltaLat = result & 1 ? ~(result >> 1) : result >> 1;
+      lat += deltaLat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.charCodeAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      const deltaLng = result & 1 ? ~(result >> 1) : result >> 1;
+      lng += deltaLng;
+
+      coordinates.push({ latitude: lat / factor, longitude: lng / factor });
+    }
+
+    return coordinates;
+  }
+
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={{ flex: 1 }}>
         <TouchableOpacity onPress={onClose} style={{ alignSelf: 'flex-end', margin: 10 }}>
           <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Close</Text>
         </TouchableOpacity>
+
         {error ? (
           <Text style={{ textAlign: 'center', marginTop: 20, color: 'red' }}>{error}</Text>
         ) : loading ? (
-          <Text style={{ textAlign: 'center', marginTop: 20 }}>Loading map...</Text>
+          <Text style={{ textAlign: 'center', marginTop: 20 }}>Loading route...</Text>
         ) : (
           <MapView
             style={{ flex: 1 }}
@@ -88,10 +140,12 @@ export default function MapModal({
               longitudeDelta: 0.05,
             }}
           >
-            <Marker coordinate={{ latitude: pickupLat!, longitude: pickupLng! }} title={`Pickup: ${pickup}`} />
-            <Marker coordinate={{ latitude: dropoffLat!, longitude: dropoffLng! }} title={`Dropoff: ${dropoff}`} />
             {coords.length > 0 && (
-              <Polyline coordinates={coords} strokeColor="#00f" strokeWidth={4} />
+              <>
+                <Marker coordinate={coords[0]} title={`Pickup: ${pickup}`} />
+                <Marker coordinate={coords[coords.length - 1]} title={`Dropoff: ${dropoff}`} />
+                <Polyline coordinates={coords} strokeColor="#00f" strokeWidth={4} />
+              </>
             )}
           </MapView>
         )}
