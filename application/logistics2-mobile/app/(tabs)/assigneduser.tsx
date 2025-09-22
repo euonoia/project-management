@@ -98,13 +98,13 @@ export default function AssignedUser({ navigation }: any) {
             <Button
             title="Show Direction"
             onPress={() => {
-              setSelectedPickup(item.pickup_location);
-              setSelectedDropoff(item.dropoff_location);
-              setSelectedPickupLat(item.pickup_latitude ?? null);
-              setSelectedPickupLng(item.pickup_longitude ?? null);
-              setSelectedDropoffLat(item.dropoff_latitude ?? null);
-              setSelectedDropoffLng(item.dropoff_longitude ?? null);
-              setMapVisible(true);
+                 setSelectedPickup(item.pickup_location);
+                  setSelectedDropoff(item.dropoff_location);
+                  setSelectedPickupLat(item.pickup_latitude ?? null);
+                  setSelectedPickupLng(item.pickup_longitude ?? null);
+                  setSelectedDropoffLat(item.dropoff_latitude ?? null);
+                  setSelectedDropoffLng(item.dropoff_longitude ?? null);
+                  setMapVisible(true);
             }}
           />
           </View>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, TouchableOpacity } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
-
+// Import the API key from environment variables
 interface MapModalProps {
   visible: boolean;
   onClose: () => void;
@@ -13,19 +13,6 @@ interface MapModalProps {
   dropoffLng?: number | null;
 }
 
-const geocode = async (address: string) => {
-  try {
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`);
-    if (!res.ok) return null;
-    const text = await res.text();
-    const data = JSON.parse(text);
-    if (data && data[0]) return [data[0].lat, data[0].lon];
-  } catch (error) {
-    console.error(error);
-  }
-  return null;
-};
-
 export default function MapModal({
   visible,
   onClose,
@@ -34,49 +21,43 @@ export default function MapModal({
   pickupLat,
   pickupLng,
   dropoffLat,
-  dropoffLng
+  dropoffLng,
 }: MapModalProps) {
-  const [coords, setCoords] = useState<{latitude: number, longitude: number}[]>([]);
+  const [coords, setCoords] = useState<{ latitude: number; longitude: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-  if (!pickup || !dropoff) return;
-  const fetchDirections = async () => {
-    setLoading(true);
-    setError('');
-    let pickupCoord, dropoffCoord;
+    if (!pickup || !dropoff) return;
 
-    console.log('pickupLat:', pickupLat, 'pickupLng:', pickupLng);
-    console.log('dropoffLat:', dropoffLat, 'dropoffLng:', dropoffLng);
+    const fetchCoords = async () => {
+      setLoading(true);
+      setError('');
 
-    if (
-      typeof pickupLat === 'number' &&
-      typeof pickupLng === 'number' &&
-      typeof dropoffLat === 'number' &&
-      typeof dropoffLng === 'number'
-    ) {
-      pickupCoord = [pickupLat, pickupLng];
-      dropoffCoord = [dropoffLat, dropoffLng];
-      console.log('Using coordinates from props:', pickupCoord, dropoffCoord);
-    } else {
-      pickupCoord = await geocode(pickup);
-      dropoffCoord = await geocode(dropoff);
-      console.log('Geocoded coordinates:', pickupCoord, dropoffCoord);
-    }
+      const pickupLatNum = Number(pickupLat);
+      const pickupLngNum = Number(pickupLng);
+      const dropoffLatNum = Number(dropoffLat);
+      const dropoffLngNum = Number(dropoffLng);
 
-    if (pickupCoord && dropoffCoord) {
-      setCoords([
-        { latitude: parseFloat(pickupCoord[0]), longitude: parseFloat(pickupCoord[1]) },
-        { latitude: parseFloat(dropoffCoord[0]), longitude: parseFloat(dropoffCoord[1]) }
-      ]);
-    } else {
-      setError('Failed to fetch location. Please try again later.');
-    }
-    setLoading(false);
-  };
-  fetchDirections();
-}, [pickup, dropoff, pickupLat, pickupLng, dropoffLat, dropoffLng]);
+      if (
+        !isNaN(pickupLatNum) &&
+        !isNaN(pickupLngNum) &&
+        !isNaN(dropoffLatNum) &&
+        !isNaN(dropoffLngNum)
+      ) {
+        setCoords([
+          { latitude: pickupLatNum, longitude: pickupLngNum },
+          { latitude: dropoffLatNum, longitude: dropoffLngNum },
+        ]);
+      } else {
+        setError('Missing or invalid coordinates for pickup/dropoff.');
+      }
+
+      setLoading(false);
+    };
+
+    fetchCoords();
+  }, [pickup, dropoff, pickupLat, pickupLng, dropoffLat, dropoffLng]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -98,8 +79,8 @@ export default function MapModal({
               longitudeDelta: 0.05,
             }}
           >
-            {coords[0] && <Marker coordinate={coords[0]} title="Pickup" />}
-            {coords[1] && <Marker coordinate={coords[1]} title="Dropoff" />}
+            {coords[0] && <Marker coordinate={coords[0]} title={`Pickup: ${pickup}`} />}
+            {coords[1] && <Marker coordinate={coords[1]} title={`Dropoff: ${dropoff}`} />}
             {coords.length === 2 && (
               <Polyline coordinates={coords} strokeColor="#00f" strokeWidth={4} />
             )}

@@ -42,17 +42,18 @@ app.post("/login", (req, res) => {
     }
   );
 });
-
 app.get("/assigned-customers/:user_id", (req, res) => {
   const { user_id } = req.params;
+
   // Get driver's name
   db.query(
     "SELECT firstname, lastname FROM users WHERE user_id = ? LIMIT 1",
     [user_id],
     (err, users) => {
       if (err || users.length === 0) return res.json([]);
-      const driverName = users[0].firstname + ' ' + users[0].lastname;
-      // Fetch reservations where this driver is assigned
+      const driverName = users[0].firstname + " " + users[0].lastname;
+
+      // Fetch reservations with joined saved_locations for lat/lng
       const sql = `
         SELECT 
           vr.reservation_ref,
@@ -64,20 +65,44 @@ app.get("/assigned-customers/:user_id", (req, res) => {
           vr.status,
           v.vehicle_plate,
           v.car_brand,
-          v.model
+          v.model,
+          -- pickup latitude/longitude
+          sp.latitude AS pickup_latitude,
+          sp.longitude AS pickup_longitude,
+          -- dropoff latitude/longitude
+          sd.latitude AS dropoff_latitude,
+          sd.longitude AS dropoff_longitude
         FROM vehicle_reservations vr
-        JOIN vehicles v ON vr.vehicle_registration_id = v.registration_id
-        JOIN users u ON vr.user_id = u.user_id
+        JOIN vehicles v 
+          ON vr.vehicle_registration_id = v.registration_id
+        JOIN users u 
+          ON vr.user_id = u.user_id
+        -- join for pickup
+        LEFT JOIN saved_locations sp 
+          ON sp.reservation_ref = vr.reservation_ref 
+         AND sp.vehicle_registration_id = vr.vehicle_registration_id
+         AND sp.type = 'pickup'
+        -- join for dropoff
+        LEFT JOIN saved_locations sd 
+          ON sd.reservation_ref = vr.reservation_ref 
+         AND sd.vehicle_registration_id = vr.vehicle_registration_id
+         AND sd.type = 'dropoff'
         WHERE vr.assigned_driver = ?
         ORDER BY vr.pickup_datetime DESC
       `;
+
       db.query(sql, [driverName], (err2, results) => {
-        if (err2) return res.json({ success: false, message: "DB error" });
+        if (err2) {
+          console.error("DB error:", err2);
+          return res.json({ success: false, message: "DB error" });
+        }
         res.json(results);
       });
     }
   );
 });
+
+
 
 app.get("/travel-history/:user_id", (req, res) => {
   const { user_id } = req.params;
