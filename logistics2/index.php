@@ -55,10 +55,7 @@ $is_logged_in = isset($_SESSION['user_id']);
     </a>
   <?php else: ?>
     <!-- Not logged-in: open auth modal -->
-    <button id="becomeDriverBtn" 
-       class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded text-white font-medium">
-      Become a Driver
-    </button>
+    
   <?php endif; ?>
 
     <!-- Make a Reservation Button (only if logged in) -->

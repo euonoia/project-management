@@ -137,7 +137,7 @@ if ($userId !== '' && isset($conn)) {
 <body>
     <header>
         <h1>Information</h1>
-        <a href="../index.php">return</a>
+        <a href="../reservation/reserve.php">return</a>
     </header>
 
     <div class="registration">
