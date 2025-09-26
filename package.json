@@ -1,6 +1,8 @@
 {
-  "type": "module",            
+  "type": "module",
   "dependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/typography": "^0.5.19",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
@@ -10,5 +12,10 @@
     "md5": "^2.3.0",
     "mysql2": "^3.14.4",
     "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17"
   }
 }
