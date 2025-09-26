@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['email']     = $email;
             $_SESSION['role']      = $role;
             $stmt->close();
-            header('Location: /project-management/logistics2/index.php');
+            header('Location: /project-management/logistics2/reservation/reserve.php');
             exit();
         } else {
             echo 'Error: ' . $stmt->error;
@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['email']     = $row['email'] ?? '';
             $_SESSION['role']      = $row['role'] ?? '';
             $stmt->close();
-            header('Location: /project-management/logistics2/index.php');
+            header('Location: /project-management/logistics2/reservation/reserve.php');
             exit();
         } else {
             $stmt->close();
@@ -102,5 +102,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // If reached here without a handled POST action
-header('Location: /PM-TNVS/logistics2/index.php');
+header('Location: /project-management/logistics2/index.php');
 exit();
