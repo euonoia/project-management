@@ -1,13 +1,6 @@
 <?php
 include('../database/connect.php');
 session_start();
-function generateRegistrationId(): string {
-    $prefix = 'REG-';
-    $date = date('Ymd'); // YYYYMMDD
-    $rand = strtoupper(bin2hex(random_bytes(3))); // 6 hex chars
-    return $prefix . $date . '-' . $rand;
-}
-$registration = generateRegistrationId();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -22,7 +15,6 @@ $registration = generateRegistrationId();
     <div class="container" id="signup" style="display:none;">
       <h1 class="form-title"></h1>
       <form method="post" action="connections/auth/bawalpumasok.php">
-        <input type="hidden" id="user_id" name="user_id" style="display: ;" value="<?php echo htmlspecialchars($registration, ENT_QUOTES, 'UTF-8'); ?>" readonly required>
         <div class="input-group">
           <label for="fName">
             <span class="icon-label">
