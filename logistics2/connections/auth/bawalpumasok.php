@@ -20,11 +20,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user_id   = sanitize($_POST['registration'] ?? '') ?: generateUserId();
         $firstName = sanitize($_POST['firstname'] ?? ($_POST['fName'] ?? ''));
         $lastName  = sanitize($_POST['lastname'] ?? ($_POST['lName'] ?? ''));
+        $age       = sanitize($_POST['age'] ?? '');
+        $gender    = sanitize($_POST['gender'] ?? '');
+        $contact   = sanitize($_POST['contact'] ?? '');
         $email     = sanitize($_POST['email'] ?? '');
         $password  = sanitize($_POST['password'] ?? '');
         $role      = sanitize($_POST['role'] ?? '');
 
-        if ($firstName === '' || $lastName === '' || $email === '' || $password === '' || $role === '') {
+        if ($firstName === '' || $lastName === '' || $age === '' || $gender === '' || $contact === '' || $email === '' || $password === '' || $role === '') {
             echo 'All fields are required.';
             exit();
         }
@@ -45,9 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->close();
 
         // Insert new user
-        $stmt = $conn->prepare('INSERT INTO users (user_id, firstname, lastname, email, password, role) VALUES (?, ?, ?, ?, ?, ?)');
+        $stmt = $conn->prepare('INSERT INTO users (user_id, firstname, lastname, age, gender, contact, email, password, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
         if (!$stmt) { echo 'DB Error: prepare failed'; exit(); }
-        $stmt->bind_param('ssssss', $user_id, $firstName, $lastName, $email, $passwordHashed, $role);
+        $stmt->bind_param('sssssssss', $user_id, $firstName, $lastName, $age, $gender, $contact, $email, $passwordHashed, $role);
         if ($stmt->execute()) {
             // Set session for the new user
             $_SESSION['user_id']   = $user_id;
