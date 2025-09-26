@@ -5,7 +5,8 @@ module.exports = {
     "./reservation/**/*.php",  // (optional) if you want to include other folders
     "./fleetvehiclemanagement/**/*.php",
     "./dispatchsystem/**/*.php",
-    "./src/**/*.{js,ts}",      // if you have JS/TS
+    "./src/**/*.{js,ts}", 
+    "./**/*.js",      // if you have JS/TS
   ],
   theme: {
     extend: {},

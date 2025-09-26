@@ -73,15 +73,19 @@ $active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reservation</title>
+    <link href="../../public/css/output.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
+
      <?php if (!empty($flash)): ?>
     <div style="padding:10px;border:1px solid #999;margin:8px 0;background:#f7f7f7;">
       <strong><?= e(strtoupper($flash['type'])) ?>:</strong> <?= e($flash['msg']) ?>
     </div>
   <?php endif; ?>
+  
     <section class="panel">
             <a href="../index.php">return</a>
             <h2 style="margin-top:0">Create Reservation</h2>
@@ -172,10 +176,10 @@ $active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
                     <button type="button" class="btn btn-primary" onclick="showFareModal()">Create Reservation</button>
                 </div>
                 <input type="hidden" name="distance_km" id="distance_km" />
-<input type="hidden" name="estimated_time" id="estimated_time" />
-<input type="hidden" name="driver_earnings" id="driver_earnings" />
-<input type="hidden" name="passenger_fare" id="passenger_fare" />
-<input type="hidden" name="incentives" id="incentives" />
+                <input type="hidden" name="estimated_time" id="estimated_time" />
+                <input type="hidden" name="driver_earnings" id="driver_earnings" />
+                <input type="hidden" name="passenger_fare" id="passenger_fare" />
+                <input type="hidden" name="incentives" id="incentives" />
             </form>
             <?php endif; ?>
         </section>
@@ -264,7 +268,6 @@ function get_progress_percent($status) {
 }
 ?>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="mapmodal.js"></script>
-<script src="reservation.js"></script>
+<script src="reservation.js" defer></script>
 </body>
 </html>
