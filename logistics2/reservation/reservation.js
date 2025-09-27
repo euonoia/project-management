@@ -105,12 +105,12 @@ function submitReservation() {
     return lat >= PH_BOUNDS.south && lat <= PH_BOUNDS.north && lng >= PH_BOUNDS.west && lng <= PH_BOUNDS.east;
   }
 
-  function ensurePHQuery(q) {
+   function ensurePHQuery(q) {
     var hasPH = /philippines|ph\b/i.test(q);
     return hasPH ? q : (q + ', Philippines');
   }
 
-  function setSelectedIfInPH(lat, lng, address) {
+    function setSelectedIfInPH(lat, lng, address) {
     if (!isLatLngInPH(lat, lng)) {
       document.getElementById('address-text').textContent = 'Selected point is outside the Philippines.';
       alert('Please choose a location within the Philippines.');
@@ -127,11 +127,12 @@ function submitReservation() {
     currentMode = mode;
     modal.style.display = 'flex';
 
-    // Destroy previous map instance if exists
+    // ✅ Proper cleanup of Leaflet map
     if (map) {
-      map.remove();
+      map.off();    // remove event listeners
+      map.remove(); // destroy map instance
       map = null;
-      document.getElementById('map').innerHTML = ""; // Clear old map container
+      marker = null;
     }
 
     setTimeout(function(){
@@ -139,12 +140,14 @@ function submitReservation() {
       setTimeout(function(){ if (map) map.invalidateSize(); }, 100);
     }, 0);
   }
+
   function closeModal() {
     modal.style.display = 'none';
   }
 
+ 
   function initMapIfNeeded() {
-    if (!map) {
+       if (!map) {
       map = L.map('map', {
         maxBounds: [[PH_BOUNDS.south, PH_BOUNDS.west],[PH_BOUNDS.north, PH_BOUNDS.east]],
         maxBoundsViscosity: 0.8
@@ -179,7 +182,6 @@ function submitReservation() {
             current.lat = plat;
             current.lng = plng;
           } else {
-            // keep default Manila center
             console.warn('Geolocation outside PH, defaulting to Manila.');
           }
           map.setView([current.lat, current.lng], 15);
