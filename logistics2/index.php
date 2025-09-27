@@ -18,7 +18,7 @@ $is_logged_in = isset($_SESSION['user_id']);
   <!-- Header -->
   <header class="bg-black text-white">
     <div class="container mx-auto flex justify-between items-center px-6 py-5">
-      <h1 class="text-3xl font-extrabold tracking-wide">LOGISTICS 2</h1>
+      <h1 class="text-3xl font-extrabold tracking-wide">Drive</h1>
       <nav class="flex gap-8 text-sm uppercase">
         <a href="#work" class="hover:text-gray-300">Work</a>
         <a href="#about" class="hover:text-gray-300">About</a>
@@ -40,10 +40,12 @@ $is_logged_in = isset($_SESSION['user_id']);
      <!-- Left content (headline + description) -->
 <div class="text-center md:text-left">
   <h2 class="text-5xl md:text-6xl font-extrabold mb-6">
-    Drive
+    Logistics 2
   </h2>
   <p class="max-w-xl text-lg text-gray-600 mb-6">
-    A modern project management system built to connect drivers and users seamlessly.
+     A modern fleet and transportation management platform.  
+  <br> It seamlessly connects drivers and users while powering vehicle reservations,  
+  dispatching, trip performance monitoring, <br>and cost optimization all in one system.
   </p>
 
   <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
@@ -86,26 +88,109 @@ $is_logged_in = isset($_SESSION['user_id']);
     </div>
   </section>
 
-  <!-- Work -->
-  <section id="work" class="py-16">
-    <div class="container mx-auto px-6">
-      <h3 class="text-3xl font-bold mb-8">Our Work</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="p-6 bg-white rounded shadow hover:shadow-lg transition">
-          <h4 class="font-semibold mb-2">🚚 Logistics Flow</h4>
-          <p class="text-gray-600">Streamlined driver and fleet management.</p>
-        </div>
-        <div class="p-6 bg-white rounded shadow hover:shadow-lg transition">
-          <h4 class="font-semibold mb-2">📊 Project 1</h4>
-          <p class="text-gray-600">A demo showcasing portal features.</p>
-        </div>
-        <div class="p-6 bg-white rounded shadow hover:shadow-lg transition">
-          <h4 class="font-semibold mb-2">🗂 Reservation System</h4>
-          <p class="text-gray-600">Effortless bookings and scheduling.</p>
+
+<!-- Balanced "Our Work" section: left-aligned title, pyramid layout, consistent card size, better spacing -->
+<section id="work" class="py-16 bg-gradient-to-br from-gray-50 to-gray-100">
+  <div class="container mx-auto px-4">
+    <h3 class="text-3xl md:text-4xl font-extrabold mb-8 text-left text-gray-900 tracking-tight">
+      Our Work
+    </h3>
+    <!-- Pyramid layout -->
+<div class="flex flex-col items-start gap-6">
+  <!-- Top row: 1 card -->
+  <div class="w-full max-w-2xl mx-auto">
+    <div class="bg-white px-6 py-5 rounded-xl shadow-md border border-gray-100 flex items-start gap-3 h-full">
+      <span class="inline-block bg-blue-100 text-blue-600 rounded-full p-3 shrink-0">
+        <i class="fa-solid fa-car-side text-lg"></i>
+      </span>
+      <div>
+        <h4 class="text-lg font-semibold text-gray-800 mb-1">Fleet & Vehicle Management</h4>
+        <p class="text-gray-600 text-sm">
+          Organize and oversee your vehicles with ease, ensuring smooth operations and efficient utilization.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Middle row: 2 cards -->
+<div class="flex flex-col md:flex-row gap-6 w-full max-w-3xl mx-auto items-stretch">
+  <div class="flex-1 flex">
+    <div class="bg-white px-6 py-5 rounded-xl shadow-md border border-gray-100 flex items-start gap-3 h-full w-full">
+      <span class="inline-block bg-green-100 text-green-600 rounded-full p-3 shrink-0">
+        <i class="fa-solid fa-calendar-check text-lg"></i>
+      </span>
+      <div>
+        <h4 class="text-lg font-semibold text-gray-800 mb-1">Vehicle Reservation & Dispatch</h4>
+        <p class="text-gray-600 text-sm">
+          Simplify bookings, dispatch scheduling, and real-time trip coordination for hassle-free transport.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="flex-1 flex">
+    <div class="bg-white px-6 py-5 rounded-xl shadow-md border border-gray-100 flex items-start gap-3 h-full w-full">
+      <span class="inline-block bg-orange-100 text-orange-600 rounded-full p-3 shrink-0">
+        <i class="fa-solid fa-chart-line text-lg"></i>
+      </span>
+      <div>
+        <h4 class="text-lg font-semibold text-gray-800 mb-1">Cost Analysis & Optimization</h4>
+        <p class="text-gray-600 text-sm">
+          Monitor expenses, optimize routes, and reduce operational costs with smart analytics.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Bottom row: 3 cards -->
+  <div class="flex flex-col md:flex-row gap-6 w-full max-w-4xl mx-auto items-stretch">
+    <div class="flex-1">
+      <div class="bg-white px-6 py-5 rounded-xl shadow-md border border-gray-100 flex items-start gap-3 h-full">
+        <span class="inline-block bg-purple-100 text-purple-600 rounded-full p-3 shrink-0">
+          <i class="fa-solid fa-gauge-high text-lg"></i>
+        </span>
+        <div>
+          <h4 class="text-lg font-semibold text-gray-800 mb-1">Driver & Trip Performance</h4>
+          <p class="text-gray-600 text-sm">
+            Track driver performance and trip progress with actionable insights for accountability and safety.
+          </p>
         </div>
       </div>
     </div>
-  </section>
+    <div class="flex-1">
+      <div class="bg-white px-6 py-5 rounded-xl shadow-md border border-gray-100 flex items-start gap-3 h-full">
+        <span class="inline-block bg-cyan-100 text-cyan-600 rounded-full p-3 shrink-0">
+          <i class="fa-solid fa-mobile-screen-button text-lg"></i>
+        </span>
+        <div>
+          <h4 class="text-lg font-semibold text-gray-800 mb-1">Mobile Fleet Command</h4>
+          <p class="text-gray-600 text-sm">
+            Manage and monitor fleet operations anytime, anywhere with our mobile-first command app.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="flex-1">
+      <div class="bg-white px-6 py-5 rounded-xl shadow-md border border-gray-100 flex items-start gap-3 h-full">
+        <span class="inline-block bg-pink-100 text-pink-600 rounded-full p-3 shrink-0">
+          <i class="fa-solid fa-shield-halved text-lg"></i>
+        </span>
+        <div>
+          <h4 class="text-lg font-semibold text-gray-800 mb-1">Safety & Compliance</h4>
+          <p class="text-gray-600 text-sm">
+            Ensure all trips and drivers meet safety standards and compliance requirements for peace of mind.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+</section>
+
+
 
   <!-- About -->
   <section id="about" class="py-16 bg-neutral-100">
@@ -247,7 +332,7 @@ $is_logged_in = isset($_SESSION['user_id']);
   </div>
 </div>
 
-
+<script src="index.js" defer></script>
 <!-- JS for modal -->
 <script>
   const modal = document.getElementById("authModal");

@@ -4,7 +4,7 @@ include('../../database/connect.php');
 
 // Ensure user is logged in
 if (!isset($_SESSION['user_id'])) {
-    header('Location: ../login.php');
+    header('Location: ../index.php');
     exit();
 }
 $is_logged_in = isset($_SESSION['user_id']);
@@ -89,10 +89,10 @@ $active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
       <nav class="flex gap-8 text-sm uppercase">
         <a href="#work" class="hover:text-gray-300">Work</a>
         <a href="#about" class="hover:text-gray-300">About</a>
-        <a href="#contact" class="hover:text-gray-300">Contact</a>
+        <a href="#progress" class="hover:text-gray-300">Progress</a>
       </nav>
       <?php if ($is_logged_in): ?>
-  <a href="logout.php" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-medium">
+  <a href="../logout.php" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-medium">
     Logout
   </a>
 <?php endif; ?>
@@ -100,169 +100,139 @@ $active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
     </div>
   </header>
 
-  <!-- Hero -->
-  <section class="bg-gradient-to-b from-gray-100 to-gray-200 py-20">
-    <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 items-center gap-12">
+        <!-- Hero Section with Create Reservation Form -->
+<section id="work" class="bg-gradient-to-b from-gray-100 to-gray-200 py-20">
+  <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 items-start gap-12">
 
-     <!-- Left content (headline + description) -->
-<div class="text-center md:text-left">
-  <h2 class="text-5xl md:text-6xl font-extrabold mb-6">
-    Drive
-  </h2>
-  <p class="max-w-xl text-lg text-gray-600 mb-6">
-    A modern project management system built to connect drivers and users seamlessly.
-  </p>
+    <!-- Left content -->
+    <div class="text-center md:text-left">
+      <h2 class="text-5xl md:text-6xl font-extrabold mb-6">Reservation</h2>
+      <p class="max-w-xl text-lg text-gray-600 mb-6">
+        A modern project management system built to connect drivers and users seamlessly.
+      </p>
 
-  <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-      <?php if ($is_logged_in): ?>
-    <!-- Logged-in: direct link -->
-    <a href="fleetvehiclemanagement/index.php" 
-       class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded text-white font-medium">
-      Become a Driver
-    </a>
-  <?php else: ?>
-    <!-- Not logged-in: open auth modal -->
-    
-  <?php endif; ?>
-
-    <!-- Make a Reservation Button (only if logged in) -->
-    <?php if ($is_logged_in): ?>
-      <a href="reservation/reserve.php" 
-         class="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded text-white font-medium">
-        Make a Reservation
-      </a>
-    <?php endif; ?>
-  </div>
-</div>
-
-<?php if (!$is_logged_in): ?>
-<!-- Right content (Sign In button only if not logged in) -->
-<div class="text-center md:text-right mt-6 md:mt-0">
-  <div class="flex justify-center md:justify-end">
-    <button id="heroSignInBtn" 
-      class="px-6 py-3 bg-orange-600 hover:bg-orange-500 rounded text-white font-medium">
-      Sign In to Continue
-    </button>
-  </div>
-</div>
-<?php endif; ?>
-
-
+      <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+        <?php if ($is_logged_in): ?>
+          <!-- Logged-in: direct link -->
+          <a href="../fleetvehiclemanagement/index.php" 
+             class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded text-white font-medium">
+            Become a Driver
+          </a>
+        <?php endif; ?>
       </div>
-
     </div>
-  </section>
 
-  <section class="min-h-screen bg-gray-50">
-  <?php if (!empty($flash)): ?>
-    <div class="p-3 border border-gray-300 bg-gray-100 rounded my-4 max-w-xl mx-auto">
-      <strong class="uppercase"><?= e(strtoupper($flash['type'])) ?>:</strong> <?= e($flash['msg']) ?>
-    </div>
-  <?php endif; ?>
-
-  <section class="max-w-3xl mx-auto mt-8 bg-white rounded-xl shadow-lg p-8">
-    <a href="../index.php" class="text-blue-600 hover:underline mb-4 inline-block">&larr; Return</a>
-    <h2 class="text-2xl font-bold mb-6">Create Reservation</h2>
-    <?php if ($active_reservation): ?>
-      <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded">
-        <strong>Note:</strong> You have an active reservation (<b><?= e($active_reservation['reservation_ref']) ?></b>) with status 
-        <span class="font-semibold"><?= e($active_reservation['status']) ?></span>.<br>
-        Please complete or cancel your current reservation before creating a new one.
-      </div>
-    <?php elseif (empty($vehicles)): ?>
-      <p class="text-gray-500 mb-4">No vehicles found in the system.</p>
-      <div class="flex">
-        <a class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700" href="../fleetvehiclemanagement/index.php">Open Fleet Vehicle Management</a>
-      </div>
-    <?php else: ?>
-      <?php if (!empty($showing_all) && $showing_all): ?>
-        <p class="text-gray-500 mb-4">No vehicles are linked to your account. Showing all vehicles.</p>
+    <!-- Right content (Create Reservation Form) -->
+    <div>
+      <?php if (!empty($flash)): ?>
+        <div class="p-3 border border-gray-300 bg-gray-100 rounded mb-6">
+          <strong class="uppercase"><?= e(strtoupper($flash['type'])) ?>:</strong> <?= e($flash['msg']) ?>
+        </div>
       <?php endif; ?>
-      <form method="post" action="../connections/vehiclereservationdispatchsystemdb/create_reservation.php" class="space-y-6">
-        <input type="hidden" name="action" value="create" />
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label for="vehicle_registration_id" class="block font-medium mb-1">Vehicle</label>
-            <select id="vehicle_registration_id" name="vehicle_registration_id" required class="w-full border rounded px-3 py-2">
-              <option value="">-- Select Vehicle --</option>
-              <?php foreach ($vehicles as $v): ?>
-                <option value="<?= e($v['registration_id']) ?>">
-                  <?= e($v['vehicle_plate']) ?> — <?= e($v['car_brand'] . ' ' . $v['model']) ?> (<?= e($v['vehicle_type']) ?>)
-                </option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-          <div>
-            <label for="passengers_count" class="block font-medium mb-1">Passengers</label>
-            <input type="number" id="passengers_count" name="passengers_count" min="1" step="1" required class="w-full border rounded px-3 py-2" />
-            <div class="text-xs text-gray-500 mt-1">Must not exceed the vehicle capacity.</div>
-          </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label for="trip_date" class="block font-medium mb-1">Trip Date</label>
-            <input type="date" id="trip_date" name="trip_date" required value="<?= e(date('Y-m-d')) ?>" class="w-full border rounded px-3 py-2" />
-          </div>
-          <div>
-            <label for="pickup_time" class="block font-medium mb-1">Pick-up Time</label>
-            <input type="time" id="pickup_datetime" name="pickup_datetime" required class="w-full border rounded px-3 py-2" />
-          </div>
-          <div>
-            <label for="dropoff_time" class="block font-medium mb-1">Drop-off Time</label>
-            <input type="time" id="dropoff_datetime" name="dropoff_datetime" required class="w-full border rounded px-3 py-2" />
-          </div>
-        </div>
+      <div class="bg-white rounded-xl shadow-lg p-8">
+        
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label for="pickup_location" class="block font-medium mb-1">Pick-up Location</label>
-            <div class="flex gap-2">
-              <input type="text" id="pickup_location" name="pickup_location" placeholder="e.g., Main Office" required class="flex-1 border rounded px-3 py-2" />
-              <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" id="openPickupMap" type="button">Pick on map</button>
+        <?php if ($active_reservation): ?>
+          <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded">
+            <strong>Note:</strong> You have an active reservation 
+            (<b><?= e($active_reservation['reservation_ref']) ?></b>) with status 
+            <span class="font-semibold"><?= e($active_reservation['status']) ?></span>.<br>
+            Please complete or cancel your current reservation before creating a new one.
+          </div>
+
+        <?php elseif (empty($vehicles)): ?>
+          <p class="text-gray-500 mb-4">No vehicles found in the system.</p>
+          <a class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-gray-700" 
+             href="../fleetvehiclemanagement/index.php">
+            Open Fleet Vehicle Management
+          </a>
+
+        <?php else: ?>
+          <form method="post" action="../connections/vehiclereservationdispatchsystemdb/create_reservation.php" class="space-y-6">
+            <input type="hidden" name="action" value="create" />
+
+            <!-- Vehicle + Passengers -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="vehicle_registration_id" class="block font-medium mb-1">Vehicle</label>
+                <select id="vehicle_registration_id" name="vehicle_registration_id" required class="w-full border rounded px-3 py-2">
+                  <option value="">-- Select Vehicle --</option>
+                  <?php foreach ($vehicles as $v): ?>
+                    <option value="<?= e($v['registration_id']) ?>">
+                      <?= e($v['vehicle_plate']) ?> — <?= e($v['car_brand'] . ' ' . $v['model']) ?> (<?= e($v['vehicle_type']) ?>)
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+              <div>
+                <label for="passengers_count" class="block font-medium mb-1">Passengers</label>
+                <input type="number" id="passengers_count" name="passengers_count" min="1" step="1" required class="w-full border rounded px-3 py-2" />
+                <div class="text-xs text-gray-500 mt-1">Must not exceed the vehicle capacity.</div>
+              </div>
             </div>
-            <input type="hidden" id="pickup_lat" name="pickup_lat" />
-            <input type="hidden" id="pickup_lng" name="pickup_lng" />
-            <input type="hidden" id="pickup_address" name="pickup_address" />
-            <input type="hidden" id="pickup_location_id" name="pickup_location_id" />
-          </div>
-          <div>
-            <label for="dropoff_location" class="block font-medium mb-1">Drop-off Location</label>
-            <div class="flex gap-2">
-              <input type="text" id="dropoff_location" name="dropoff_location" placeholder="e.g., Client Site" required class="flex-1 border rounded px-3 py-2" />
-              <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" id="openDropoffMap" type="button">Pick on map</button>
+
+            <!-- Trip Date & Times -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label for="trip_date" class="block font-medium mb-1">Trip Date</label>
+                <input type="date" id="trip_date" name="trip_date" required value="<?= e(date('Y-m-d')) ?>" class="w-full border rounded px-3 py-2" />
+              </div>
+              <div>
+                <label for="pickup_time" class="block font-medium mb-1">Pick-up Time</label>
+                <input type="time" id="pickup_datetime" name="pickup_datetime" required class="w-full border rounded px-3 py-2" />
+              </div>
+              <div>
+                <label for="dropoff_time" class="block font-medium mb-1">Drop-off Time</label>
+                <input type="time" id="dropoff_datetime" name="dropoff_datetime" required class="w-full border rounded px-3 py-2" />
+              </div>
             </div>
-            <input type="hidden" id="dropoff_lat" name="dropoff_lat" />
-            <input type="hidden" id="dropoff_lng" name="dropoff_lng" />
-            <input type="hidden" id="dropoff_address" name="dropoff_address" />
-            <input type="hidden" id="dropoff_location_id" name="dropoff_location_id" />
-          </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label for="requester_name" class="block font-medium mb-1">Requester</label>
-            <input type="text" id="requester_name" name="requester_name" placeholder="Who requested?" required value="<?= e($requester_name) ?>" class="w-full border rounded px-3 py-2" />
-          </div>
-          <div>
-            <label for="purpose" class="block font-medium mb-1">Purpose</label>
-            <input type="text" id="purpose" name="purpose" placeholder="Trip purpose" class="w-full border rounded px-3 py-2" />
-          </div>
-        </div>
+            <!-- Pickup + Dropoff -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="pickup_location" class="block font-medium mb-1">Pick-up Location</label>
+                <div class="flex gap-2">
+                  <input type="text" id="pickup_location" name="pickup_location" placeholder="e.g., Main Office" required class="flex-1 border rounded px-3 py-2" />
+                  <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" id="openPickupMap" type="button">Pick on map</button>
+                </div>
+              </div>
+              <div>
+                <label for="dropoff_location" class="block font-medium mb-1">Drop-off Location</label>
+                <div class="flex gap-2">
+                  <input type="text" id="dropoff_location" name="dropoff_location" placeholder="e.g., Client Site" required class="flex-1 border rounded px-3 py-2" />
+                  <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" id="openDropoffMap" type="button">Pick on map</button>
+                </div>
+              </div>
+            </div>
 
-        <div class="mt-6 flex justify-end">
-          <button type="button" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onclick="showFareModal()">Create Reservation</button>
-        </div>
-        <input type="hidden" name="distance_km" id="distance_km" />
-        <input type="hidden" name="estimated_time" id="estimated_time" />
-        <input type="hidden" name="driver_earnings" id="driver_earnings" />
-        <input type="hidden" name="passenger_fare" id="passenger_fare" />
-        <input type="hidden" name="incentives" id="incentives" />
-      </form>
-    <?php endif; ?>
-  </section>
-  
-  <section class="max-w-3xl mx-auto mt-12 bg-white rounded-xl shadow-lg p-8">
+            <!-- Requester + Purpose -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label for="requester_name" class="block font-medium mb-1">Requester</label>
+                <input type="text" id="requester_name" name="requester_name" placeholder="Who requested?" required value="<?= e($requester_name) ?>" class="w-full border rounded px-3 py-2" />
+              </div>
+              <div>
+                <label for="purpose" class="block font-medium mb-1">Purpose</label>
+                <input type="text" id="purpose" name="purpose" placeholder="Trip purpose" class="w-full border rounded px-3 py-2" />
+              </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="mt-6 flex justify-end">
+              <button type="button" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onclick="showFareModal()">
+                Create Reservation
+              </button>
+            </div>
+          </form>
+        <?php endif; ?>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <section id="progress" class="py-16 bg-white">
+    <section class="max-w-3xl mx-auto mt-12 bg-white rounded-xl shadow-lg p-8">
     <h2 class="text-2xl font-bold mb-6">Reservation Progress</h2>
     <?php if (empty($user_reservations)): ?>
       <div class="text-gray-500">You have no reservations yet.</div>
@@ -301,7 +271,7 @@ $active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
       </div>
     <?php endif; ?>
   </section>
-</section>
+  </section>
 
   <!-- About -->
   <section id="about" class="py-16 bg-neutral-100">
