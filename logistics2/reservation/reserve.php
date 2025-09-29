@@ -1,73 +1,30 @@
 <?php
 session_start();
 include('../../database/connect.php');
+include('includes/helpers.php');
+include('includes/queries.php');
 
 // Ensure user is logged in
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../index.php');
     exit();
 }
-$is_logged_in = isset($_SESSION['user_id']);
 
+$is_logged_in = true;
 $user_id = (string)$_SESSION['user_id'];
 
-// Fetch current user's name
-$stmt = $dbh->prepare('SELECT firstname, lastname FROM users WHERE user_id = :uid LIMIT 1');
-$stmt->execute([':uid' => $user_id]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
+// Fetch user info
+$user = get_user($dbh, $user_id);
 $requester_name = $user ? $user['firstname'] . ' ' . $user['lastname'] : '';
 
-// Helpers
-function p($key, $default = '') { return isset($_POST[$key]) ? trim((string)$_POST[$key]) : $default; }
-function q($key, $default = '') { return isset($_GET[$key]) ? trim((string)$_GET[$key]) : $default; }
-function e($str) { return htmlspecialchars((string)$str, ENT_QUOTES, 'UTF-8'); }
-function to_mysql_dt($val) {
-    if ($val === '' || $val === null) return null;
-    // Support both 'Y-m-d H:i:s' and 'Y-m-dTH:i' inputs
-    $val = str_replace('T', ' ', $val);
-    $ts = strtotime($val);
-    return $ts ? date('Y-m-d H:i:s', $ts) : null;
-}
+// Flash message
+$flash = $_SESSION['flash'] ?? null; 
+unset($_SESSION['flash']);
 
-// Flash message helpers
-$flash = $_SESSION['flash'] ?? null; unset($_SESSION['flash']);
-function flash($type, $msg) { $_SESSION['flash'] = ['type' => $type, 'msg' => $msg]; }
-
-//fetches the other vehicles but not the current user logged in vehicle
-$vehicles = [];
-$showing_all = false;
-$stmt = $dbh->prepare("
-    SELECT registration_id,
-           vehicle_plate,
-           car_brand,
-           model,
-           vehicle_type,
-           COALESCE(NULLIF(passenger_capacity,''), NULL) AS passenger_capacity
-    FROM vehicles
-    WHERE user_id != :uid
-    ORDER BY vehicle_plate ASC
-");
-$stmt->execute([':uid' => $user_id]);
-$vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Common: fetch reservation by id and user
-function get_reservation(PDO $dbh, $user_id, $id) {
-    $stmt = $dbh->prepare('SELECT * FROM vehicle_reservations WHERE id = :id AND user_id = :uid');
-    $stmt->execute([':id' => (int)$id, ':uid' => $user_id]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $row ?: null;
-}
-
-// Fetch current user's reservations
-$stmt = $dbh->prepare('SELECT id, reservation_ref, status, trip_date, pickup_datetime, dropoff_datetime FROM vehicle_reservations WHERE user_id = :uid ORDER BY pickup_datetime DESC LIMIT 10');
-$stmt->execute([':uid' => $user_id]);
-$user_reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Check for active reservation
-$stmt = $dbh->prepare('SELECT * FROM vehicle_reservations WHERE user_id = :uid AND status NOT IN ("Completed", "Cancelled") ORDER BY pickup_datetime DESC LIMIT 1');
-$stmt->execute([':uid' => $user_id]);
-$active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
-
+// Fetch vehicles, reservations
+$vehicles = get_vehicles($dbh, $user_id);
+$user_reservations = get_user_reservations($dbh, $user_id);
+$active_reservation = get_active_reservation($dbh, $user_id);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -344,19 +301,7 @@ $active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
     </div>
   </div>
 
-<?php
-// Helper function for progress percent
-function get_progress_percent($status) {
-    switch ($status) {
-        case 'Pending': return 20;
-        case 'Approved': return 40;
-        case 'Dispatched': return 70;
-        case 'Completed': return 100;
-        case 'Cancelled': return 100;
-        default: return 0;
-    }
-}
-?>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="javascripts/reservation.js" defer></script>
 <script src="javascripts/multi-step.js" defer></script>
