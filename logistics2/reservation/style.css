@@ -48,3 +48,23 @@
 .s-Dispatched { background-color: #28a745; }
 .s-Completed { background-color: #6c757d; }
 .s-Cancelled { background-color: #dc3545; }
+
+.form-step {
+  transition: all 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.animate-shake {
+  animation: shake 0.4s;
+}
+
+.step-indicator {
+  transition: background-color 0.3s;
+}
