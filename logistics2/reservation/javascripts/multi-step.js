@@ -34,8 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Update dots (active vs inactive)
     dots.forEach((dot, idx) => {
       if (idx === step - 1) {
-        dot.style.backgroundColor = "#2563eb";
-        dot.style.borderColor = "#2563eb";
+        dot.style.backgroundColor = "#dd6b20";
+        dot.style.borderColor = "#dd6b20";
       } else {
         dot.style.backgroundColor = "#d1d5db";
         dot.style.borderColor = "#9ca3af";

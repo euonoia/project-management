@@ -86,10 +86,11 @@ $active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
   <header class="bg-black text-white">
     <div class="container mx-auto flex justify-between items-center px-6 py-5">
       <h1 class="text-3xl font-extrabold tracking-wide">Drive</h1>
-      <nav class="flex gap-8 text-sm uppercase">
+      <nav class="flex items-center gap-8 text-sm uppercase">
         <a href="#progress" class="hover:text-gray-300">Progress</a>
         <?php if ($is_logged_in): ?>
-          <a href="../logout.php" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-medium">
+          <a href="../logout.php" 
+            class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-medium uppercase">
             Logout
           </a>
         <?php endif; ?>
@@ -229,7 +230,6 @@ $active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
               <input type="hidden" id="incentives" name="incentives">
 
               <div class="pt-6 flex justify-between">
-                <button type="button" class="prev-step px-6 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">← Back</button>
                 <button type="button" onclick="showFareModal()" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">Create Reservation</button>
               </div>
             </div>
@@ -360,5 +360,6 @@ function get_progress_percent($status) {
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="javascripts/reservation.js" defer></script>
 <script src="javascripts/multi-step.js" defer></script>
+<script src="javascripts/stop.js" defer></script>
 </body>
 </html>

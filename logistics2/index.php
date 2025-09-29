@@ -2,6 +2,12 @@
 session_start();
 include('../database/connect.php');
 
+if (isset($_SESSION['user_id'])) {
+    // already logged in → don’t allow going back here
+    header("Location: reservation/reserve.php");
+    exit();
+}
+
 $is_logged_in = isset($_SESSION['user_id']);
 ?>
 <!DOCTYPE html>
@@ -65,9 +71,9 @@ $is_logged_in = isset($_SESSION['user_id']);
         <?php else: ?>
           <!-- Not logged-in: Sign In button below -->
           <button id="heroSignInBtn" 
-            class="px-6 py-3 bg-orange-600 hover:bg-orange-500 rounded text-white font-medium">
-            Sign In to Continue
-          </button>
+          class="px-6 py-3 bg-orange-600 hover:bg-orange-500 rounded text-white font-medium">
+          Sign In to Continue
+         </button>
         <?php endif; ?>
       </div>
     </div>
@@ -209,129 +215,127 @@ $is_logged_in = isset($_SESSION['user_id']);
     </div>
   </footer>
 
-          <div id="authModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 px-4">
-  <!-- Modal container -->
-  <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl flex flex-col md:flex-row overflow-hidden relative">
+     <div id="authModal" 
+     class="fixed inset-0 bg-black bg-opacity-50 hidden opacity-0 
+            transition-opacity duration-300 ease-in-out z-50 px-4 
+            items-center justify-center">
+  <div id="authContent" 
+       class="bg-white rounded-2xl shadow-xl w-full max-w-3xl 
+              flex flex-col md:flex-row overflow-hidden transform
+              opacity-0 scale-95 translate-y-6
+              transition-all duration-300 ease-out">
 
-    <!-- Left side (Branding / Title) -->
-    <div class="w-full md:w-3/5 flex flex-col justify-center items-center bg-black text-white p-8">
-    
-    <h2 id="authTitle" class="text-2xl font-semibold mb-2">Sign in</h2>
-    <p id="authSubtitle" class="text-sm text-gray-300">Use your account</p>
-    </div>
+        <!-- Left side (Branding / Title) -->
+        <div class="w-full md:w-3/5 flex flex-col justify-center items-center bg-black text-white p-8">
+          <h2 id="authTitle" class="text-2xl font-semibold mb-2">Sign in</h2>
+          <p id="authSubtitle" class="text-sm text-gray-300">Use your account</p>
+        </div>
 
-    <!-- Right side (Form) -->
-    <div class="w-full md:w-2/5 p-8 flex flex-col justify-center relative">
+        <!-- Right side (Form) -->
+        <div class="w-full md:w-2/5 p-8 flex flex-col justify-center relative">
 
-      <!-- Close Button Wrapper with justify-between -->
-      <div class="flex justify-between items-center mb-4">
-        <!-- Optional left space (empty div) -->
-        <div></div>
-        <!-- Close button -->
-        <button id="closeAuthModal" 
-                class="text-gray-500 hover:text-black text-2xl font-bold">
-          &times;
-        </button>
-      </div>
-
-      <!-- Sign In Form -->
-      <div id="signInForm" class="flex flex-col gap-4">
-        <form method="post" action="connections/auth/bawalpumasok.php" class="flex flex-col gap-4">
-          <input type="email" name="email" placeholder="Email or phone" required
-                 class="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400">
-          <input type="password" name="password" placeholder="Password" required
-                 class="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-          <a href="#" class="text-sm text-blue-600 hover:underline">Forgot email?</a>
-
-          <div class="flex justify-between items-center">
-            <button type="button" id="goToSignUp" class="text-sm text-gray-700 font-medium hover:underline">
-              Create account
+          <!-- Close Button Wrapper -->
+          <div class="flex justify-between items-center mb-4">
+            <div></div>
+            <button id="closeAuthModal" class="text-gray-500 hover:text-black text-2xl font-bold">
+              &times;
             </button>
-            <input type="submit" name="signIn" value="Login"
-                   class="bg-orange-600 text-white px-6 py-2 rounded hover:bg-orange-500 transition cursor-pointer">
           </div>
-        </form>
+
+          <!-- Sign In Form -->
+          <div id="signInForm" class="transition-opacity duration-200 ease-in-out opacity-100">
+            <form method="post" action="connections/auth/bawalpumasok.php" class="flex flex-col gap-4">
+              <input type="email" name="email" placeholder="Email or phone" required
+                    class="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <input type="password" name="password" placeholder="Password" required
+                    class="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400">
+
+              <a href="#" class="text-sm text-blue-600 hover:underline">Forgot email?</a>
+
+              <div class="flex justify-between items-center">
+                <button type="button" id="goToSignUp" class="text-sm text-gray-700 font-medium hover:underline">
+                  Create account
+                </button>
+                <input type="submit" name="signIn" value="Login"
+                      class="bg-orange-600 text-white px-6 py-2 rounded hover:bg-orange-500 transition cursor-pointer">
+              </div>
+            </form>
+          </div>
+
+          <!-- Sign Up Form -->
+          <div id="signUpForm" class="hidden transition-opacity duration-200 ease-in-out opacity-0">
+            <form method="post" action="connections/auth/bawalpumasok.php" class="flex flex-col gap-4">
+
+              <!-- First & Last Name -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex flex-col">
+                  <label class="text-sm text-gray-600 mb-1">First Name</label>
+                  <input type="text" name="firstname" required
+                        class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400">
+                </div>
+                <div class="flex flex-col">
+                  <label class="text-sm text-gray-600 mb-1">Last Name</label>
+                  <input type="text" name="lastname" required
+                        class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400">
+                </div>
+              </div>
+
+              <!-- Email & Password -->
+              <div class="flex flex-col">
+                <label class="text-sm text-gray-600 mb-1">Email</label>
+                <input type="email" name="email" required
+                      class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400">
+              </div>
+
+              <div class="flex flex-col">
+                <label class="text-sm text-gray-600 mb-1">Password</label>
+                <input type="password" name="password" required
+                      class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400">
+              </div>
+
+              <!-- Age, Gender, Contact -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="flex flex-col">
+                  <label class="text-sm text-gray-600 mb-1">Age</label>
+                  <input type="number" name="age" min="1" max="120" required
+                        class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400">
+                </div>
+                <div class="flex flex-col">
+                  <label class="text-sm text-gray-600 mb-1">Gender</label>
+                  <select name="gender" required
+                          class="w-full px-3 py-2 rounded border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-green-400">
+                    <option value="" disabled selected>Select</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="flex flex-col">
+                  <label class="text-sm text-gray-600 mb-1">Contact</label>
+                  <input type="tel" name="contact" required pattern="[0-9]{10,15}"
+                        class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
+                        title="Enter a valid phone number (10-15 digits)">
+                </div>
+              </div>
+
+              <input type="hidden" name="role" value="user">
+
+              <input type="submit" name="signUp" value="Sign Up"
+                    class="bg-orange-600 text-white px-6 py-2 rounded hover:bg-orange-500 transition cursor-pointer">
+
+            </form>
+            <div class="text-sm text-gray-600 mt-2 text-center">
+              Already have an account? 
+              <button type="button" id="goToSignIn" class="text-blue-600 font-medium hover:underline">
+                Sign in
+              </button>
+            </div>
+          </div>
+
+        </div>
       </div>
-
-      <!-- Sign Up Form -->
-      <div id="signUpForm" class="hidden flex flex-col gap-4 mt-4">
-        <form method="post" action="connections/auth/bawalpumasok.php" class="flex flex-col gap-4">
-
-          <!-- First & Last Name -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="flex flex-col">
-              <label class="text-sm text-gray-600 mb-1">First Name</label>
-              <input type="text" name="firstname" required
-                     class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400">
-            </div>
-            <div class="flex flex-col">
-              <label class="text-sm text-gray-600 mb-1">Last Name</label>
-              <input type="text" name="lastname" required
-                     class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400">
-            </div>
-          </div>
-
-          <!-- Email & Password -->
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-600 mb-1">Email</label>
-            <input type="email" name="email" required
-                   class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400">
-          </div>
-
-          <div class="flex flex-col">
-            <label class="text-sm text-gray-600 mb-1">Password</label>
-            <input type="password" name="password" required
-                   class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400">
-          </div>
-
-          <!-- Age, Gender, Contact -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="flex flex-col">
-              <label class="text-sm text-gray-600 mb-1">Age</label>
-              <input type="number" name="age" min="1" max="120" required
-                     class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400">
-            </div>
-            <div class="flex flex-col">
-              <label class="text-sm text-gray-600 mb-1">Gender</label>
-              <select name="gender" required
-                      class="w-full px-3 py-2 rounded border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-green-400">
-                <option value="" disabled selected>Select</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div class="flex flex-col">
-              <label class="text-sm text-gray-600 mb-1">Contact</label>
-              <input type="tel" name="contact" required pattern="[0-9]{10,15}"
-                     class="w-full px-3 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400"
-                     title="Enter a valid phone number (10-15 digits)">
-            </div>
-          </div>
-
-          <input type="hidden" name="role" value="user">
-
-          <input type="submit" name="signUp" value="Sign Up"
-                 class="bg-orange-600 text-white px-6 py-2 rounded hover:bg-orange-500 transition cursor-pointer">
-
-        </form>
-        <div class="text-sm text-gray-600 mt-2 text-center">
-          Already have an account? 
-          <button 
-            type="button" 
-            id="goToSignIn" 
-            class="text-blue-600 font-medium hover:underline"
-          >
-            Sign in
-          </button>
-          </div>
-
-      </div>
-
     </div>
-  </div>
-</div>
+
 
 <!-- JS for modal -->
 <script src="javascriptsindex/auth-modal.js"></script>

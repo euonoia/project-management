@@ -194,7 +194,7 @@ function submitReservation() {
     const mapSearchInput = document.getElementById('mapSearch');
     const mapSearchForm = document.getElementById('mapSearchForm');
 
-    // --- Providers (all original) ---
+    // --- Providers ---
     function providerNominatimPH(query) {
       if (!query) return Promise.reject('Empty query');
       const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&addressdetails=1&countrycodes=ph&q=${encodeURIComponent(ensurePHQuery(query))}&accept-language=en`;
@@ -262,6 +262,7 @@ function submitReservation() {
         });
     }
 
+    // 🔹 Manual submit (Enter key)
     mapSearchForm.addEventListener('submit', e => {
       e.preventDefault();
       const query = mapSearchInput.value.trim();
@@ -274,7 +275,23 @@ function submitReservation() {
         mapSearchForm.dispatchEvent(new Event('submit', { cancelable: true }));
       }
     });
-  }
+
+    // 🔹 Live search on typing (debounced)
+    let debounceTimeout;
+    mapSearchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimeout);
+      const query = mapSearchInput.value.trim();
+      if (!query) {
+        document.getElementById('address-text').textContent = 'Drag marker, click map, or search.';
+        return;
+      }
+
+      debounceTimeout = setTimeout(() => {
+        doSearch(query);
+      }, 300); // adjust debounce delay as needed
+    });
+}
+
 
   function reverseGeocode(lat, lng) {
     if (!isLatLngInPH(lat, lng)) {
@@ -320,7 +337,8 @@ tripInput.addEventListener('click', () => openModal(tripStep));
           tripInput.addEventListener('click', () => openModal(tripStep)); 
           closeBtn.addEventListener('click', closeModal);
           modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-         useBtn.addEventListener('click', () => {
+          
+          useBtn.addEventListener('click', () => {
           if (!currentMode || !isLatLngInPH(current.lat, current.lng)) {
             return alert('Select a valid PH location.');
           }
@@ -329,25 +347,32 @@ tripInput.addEventListener('click', () => openModal(tripStep));
             // Save pickup hidden fields
             document.getElementById('pickup_lat').value = current.lat;
             document.getElementById('pickup_lng').value = current.lng;
-            document.getElementById('pickup_location').value = current.address; 
+            document.getElementById('pickup_location').value = current.address;
             pickupAddress = current.address;
 
             // Show progress in readonly input
             tripInput.value = `Pick-up: ${pickupAddress} → `;
 
-            // Switch to dropoff mode
+            // Switch to dropoff mode automatically (keep modal open)
+            currentMode = 'dropoff';
             tripStep = 'dropoff';
 
-          } else if (currentMode === 'dropoff') {
+            // Optionally, update modal header/instructions
+            document.getElementById('mapModalTitle').textContent = "Select Drop-off Location";
+
+            return; // stop here so modal doesn’t close yet
+          }
+
+          if (currentMode === 'dropoff') {
             // Prevent same as pickup
             if (current.address === pickupAddress) {
-              return alert("🚫 Drop-off location cannot be the same as pick-up location. Please choose a different location.");
+              return alert("Drop-off location cannot be the same as pick-up location. Please choose a different location.");
             }
 
             // Save dropoff hidden fields
             document.getElementById('dropoff_lat').value = current.lat;
             document.getElementById('dropoff_lng').value = current.lng;
-            document.getElementById('dropoff_location').value = current.address; 
+            document.getElementById('dropoff_location').value = current.address;
             dropoffAddress = current.address;
 
             // Show both in readonly input
@@ -355,12 +380,13 @@ tripInput.addEventListener('click', () => openModal(tripStep));
 
             // Reset for future trips
             tripStep = 'pickup';
-          }
+            currentMode = null;
 
-          // Reset state and close modal
-          currentMode = null;
-          closeModal();
+            // Now we can close the modal
+            closeModal();
+          }
         });
+
 
 
 })();
