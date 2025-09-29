@@ -1,36 +1,55 @@
 document.addEventListener("DOMContentLoaded", () => {
   let currentStep = 1;
+
   const steps = Array.from(document.querySelectorAll(".form-step"));
-  const indicators = document.querySelectorAll(".step-indicator");
-  const totalSteps = steps.length;
+  const dots = Array.from(document.querySelectorAll(".step-indicator"));
   const mapModal = document.getElementById("mapModal");
 
+  // --- Show a specific step with smooth horizontal slide ---
   function showStep(step) {
-    steps.forEach((s, i) => {
-      if (i === step - 1) {
-        s.classList.remove("hidden");
-        s.classList.add("opacity-100", "translate-x-0", "transition-all", "duration-500", "ease-out");
-        s.classList.remove("opacity-0", "translate-x-4");
+    steps.forEach((el, idx) => {
+      if (idx === step - 1) {
+        el.style.display = "block";
+        el.style.zIndex = "2"; // active step on top
+        el.style.opacity = "0";
+        el.style.transform = "translateX(50px)";
+        requestAnimationFrame(() => {
+          el.style.transition = "all 0.5s cubic-bezier(.4,0,.2,1)";
+          el.style.opacity = "1";
+          el.style.transform = "translateX(0)";
+          el.style.pointerEvents = "auto";
+        });
       } else {
-        s.classList.add("hidden"); // hide immediately to prevent double form
-        s.classList.remove("opacity-100", "translate-x-0");
-        s.classList.add("opacity-0", "translate-x-4");
+        el.style.transition = "all 0.5s cubic-bezier(.4,0,.2,1)";
+        el.style.opacity = "0";
+        el.style.transform = "translateX(50px)";
+        el.style.pointerEvents = "none";
+        el.style.zIndex = "1";
+        setTimeout(() => {
+          if (idx !== step - 1) el.style.display = "none";
+        }, 500);
       }
     });
 
-    // Update dots
-    indicators.forEach((dot, i) => {
-      dot.classList.remove("bg-blue-600");
-      dot.classList.add("bg-gray-300");
-      if (i === step - 1) dot.classList.add("bg-blue-600");
+    // Update dots (active vs inactive)
+    dots.forEach((dot, idx) => {
+      if (idx === step - 1) {
+        dot.style.backgroundColor = "#2563eb";
+        dot.style.borderColor = "#2563eb";
+      } else {
+        dot.style.backgroundColor = "#d1d5db";
+        dot.style.borderColor = "#9ca3af";
+      }
     });
 
-    // Scroll into view only if not initial load
+    currentStep = step;
+
     if (!document.body.classList.contains("initial-load")) {
-      steps[step - 1].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      steps[step - 1].scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   }
 
+  // --- Validate current step ---
   function validateStep(step) {
     const inputs = steps[step - 1].querySelectorAll("input, select, textarea");
     let valid = true;
@@ -40,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
         input.classList.add("border-red-500");
         input.focus();
 
-        // Shake animation
         steps[step - 1].classList.add("animate-shake");
         setTimeout(() => steps[step - 1].classList.remove("animate-shake"), 500);
 
@@ -54,25 +72,18 @@ document.addEventListener("DOMContentLoaded", () => {
     return valid;
   }
 
-  function goNext() {
-    if (currentStep < totalSteps && validateStep(currentStep)) {
-      currentStep++;
-      showStep(currentStep);
-    }
-  }
+  // --- Dot navigation ---
+  dots.forEach((dot, idx) => {
+    dot.style.cursor = "pointer"; // show clickable cursor
+    dot.addEventListener("click", () => {
+      // Allow backward always, forward only if validation passes
+      if (idx + 1 <= currentStep || validateStep(currentStep)) {
+        showStep(idx + 1);
+      }
+    });
+  });
 
-  function goBack() {
-    if (currentStep > 1) {
-      currentStep--;
-      showStep(currentStep);
-    }
-  }
-
-  // Button handlers
-  document.querySelectorAll(".next-step").forEach(btn => btn.addEventListener("click", goNext));
-  document.querySelectorAll(".prev-step").forEach(btn => btn.addEventListener("click", goBack));
-
-  // Keyboard handling
+  // --- Keyboard handling (Enter = Next, Esc = close modal) ---
   document.addEventListener("keydown", e => {
     const isMapModalOpen = mapModal && mapModal.style.display === "flex";
 
@@ -84,17 +95,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!isMapModalOpen && e.key === "Enter") {
       e.preventDefault();
-      goNext();
+      if (currentStep < steps.length && validateStep(currentStep)) {
+        showStep(currentStep + 1);
+      }
     }
 
     if (isMapModalOpen && e.key === "Escape") {
       e.preventDefault();
-      mapModal.style.display = "none"; // close modal
+      mapModal.style.display = "none";
     }
   });
 
-  // Init
-  document.body.classList.add("initial-load"); // mark first load
+  // --- Initial setup ---
+  steps.forEach(el => {
+    el.style.transition = "all 0.5s cubic-bezier(.4,0,.2,1)";
+    el.style.opacity = "0";
+    el.style.transform = "translateX(50px)";
+    el.style.display = "none";
+
+    // 🔑 Keep steps stacked in same card
+    el.style.position = "absolute";
+    el.style.top = "0";
+    el.style.left = "0";
+    el.style.width = "100%";
+  });
+
+  // make sure parent container is relative so absolute steps stay inside
+  if (steps[0] && steps[0].parentElement) {
+    steps[0].parentElement.style.position = "relative";
+    steps[0].parentElement.style.minHeight = "120px"; // adjust for content
+  }
+
+  document.body.classList.add("initial-load");
   showStep(currentStep);
-  setTimeout(() => document.body.classList.remove("initial-load"), 600); // allow scroll after init
+  setTimeout(() => document.body.classList.remove("initial-load"), 600);
 });

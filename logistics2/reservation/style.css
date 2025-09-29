@@ -68,3 +68,18 @@
 .step-indicator {
   transition: background-color 0.3s;
 }
+* Progress Dots Styling */
+.step-indicator {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  opacity: 0.6;
+  transform: scale(1);
+}
+.step-indicator.bg-blue-600 {
+  opacity: 1;
+  transform: scale(1.3);
+  background: #2563eb; /* Tailwind blue-600 */
+  border-color: #2563eb;
+}
+#progressDots {
+  min-height: 40px;
+}
