@@ -220,7 +220,7 @@ if ($export) {
         <a href="users.php">Users</a>
         <a href="drivers.php">Drivers</a>
          <hr style="border-color:var(--border)">
-        <a href="logout.php">Logout</a>
+        <a href="../logout.php">Logout</a>
       </nav>
     </aside>
     <div class="content-area" style="display:flex;flex-direction:column;flex:1 1 0%;min-width:0;">
