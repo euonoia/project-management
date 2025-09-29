@@ -13,7 +13,7 @@ header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 
 session_start();
-require_once('../../../database/connect.php');
+require_once('../../../../database/connect.php');
 
 // Require login
 if (!isset($_SESSION['user_id'])) {
@@ -172,7 +172,7 @@ if ($export) {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Users • Vehicles • Insurance</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="../style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -196,8 +196,8 @@ if ($export) {
         </div>
       </div>
       <nav class="sidenav">
-        <a href="index.php">Dashboard</a>
-        <a href="../../dispatchsystem/index.php">Reservations</a>
+        <a href="../index.php">Dashboard</a>
+        <a href="../../../dispatchsystem/index.php">Reservations</a>
         <a href="history.php">Travel Records</a>
         <a href="users.php">Users</a>
         <a href="drivers.php" class="active">Drivers</a>

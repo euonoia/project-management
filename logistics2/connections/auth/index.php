@@ -157,9 +157,9 @@ try {
       <nav class="sidenav">
         <a href="index.php">Dashboard</a>
         <a href="../../dispatchsystem/index.php">Reservations</a>
-        <a href="history.php">Travel Records</a>
-        <a href="users.php">Users</a>
-        <a href="drivers.php">Drivers</a>
+        <a href="components/history.php">Travel Records</a>
+        <a href="components/users.php">Users</a>
+        <a href="components/drivers.php">Drivers</a>
          <hr style="border-color:var(--border)">
         <a href="../auth/logout.php">Logout</a>
       </nav>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="images/hehe.png">
-    <title>TNVS admin</title>
+    <title>Drive | ADMIN</title>
     <script src="./config/firebase-config.php"></script>
     <script type="module" src="./config/firebase.js"></script>
 </head>

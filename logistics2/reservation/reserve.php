@@ -85,18 +85,15 @@ $active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
 <!-- Header -->
   <header class="bg-black text-white">
     <div class="container mx-auto flex justify-between items-center px-6 py-5">
-      <h1 class="text-3xl font-extrabold tracking-wide">LOGISTICS 2</h1>
+      <h1 class="text-3xl font-extrabold tracking-wide">Drive</h1>
       <nav class="flex gap-8 text-sm uppercase">
-        <a href="#work" class="hover:text-gray-300">Work</a>
-        <a href="#about" class="hover:text-gray-300">About</a>
         <a href="#progress" class="hover:text-gray-300">Progress</a>
+        <?php if ($is_logged_in): ?>
+          <a href="../logout.php" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-medium">
+            Logout
+          </a>
+        <?php endif; ?>
       </nav>
-      <?php if ($is_logged_in): ?>
-  <a href="../logout.php" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-medium">
-    Logout
-  </a>
-<?php endif; ?>
-
     </div>
   </header>
 
@@ -218,7 +215,20 @@ $active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
               </div>
             </div>
 
-            <!-- Submit -->
+            <!-- Hidden fields for fare calculation -->
+            <input type="hidden" id="pickup_lat" name="pickup_lat" value="">
+            <input type="hidden" id="pickup_lng" name="pickup_lng" value="">
+            <input type="hidden" id="pickup_address" name="pickup_address" value="">
+            <input type="hidden" id="dropoff_lat" name="dropoff_lat" value="">
+            <input type="hidden" id="dropoff_lng" name="dropoff_lng" value="">
+            <input type="hidden" id="dropoff_address" name="dropoff_address" value="">
+            <input type="hidden" id="distance_km" name="distance_km" value="">
+            <input type="hidden" id="estimated_time" name="estimated_time" value="">
+            <input type="hidden" id="driver_earnings" name="driver_earnings" value="">
+            <input type="hidden" id="passenger_fare" name="passenger_fare" value="">
+            <input type="hidden" id="incentives" name="incentives" value="">
+
+            <!-- Submit button -->
             <div class="mt-6 flex justify-end">
               <button type="button" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onclick="showFareModal()">
                 Create Reservation
@@ -273,17 +283,7 @@ $active_reservation = $stmt->fetch(PDO::FETCH_ASSOC);
   </section>
   </section>
 
-  <!-- About -->
-  <section id="about" class="py-16 bg-neutral-100">
-    <div class="container mx-auto px-6 text-center">
-      <h3 class="text-3xl font-bold mb-6">About Us</h3>
-      <p class="max-w-3xl mx-auto text-gray-700">
-        We are your modern logistics and project management partner. Whether you're a user looking to book 
-        or a driver wanting opportunities, this system bridges the gap.
-      </p>
-    </div>
-  </section>
-
+  
   <!-- Footer -->
   <footer id="contact" class="bg-black text-white py-8">
     <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
@@ -347,6 +347,7 @@ function get_progress_percent($status) {
 }
 ?>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="reservation.js" defer></script>
+<script src="javascripts/reservation.js" defer></script>
+
 </body>
 </html>

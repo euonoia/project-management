@@ -9,89 +9,85 @@ $is_logged_in = isset($_SESSION['user_id']);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project Management Landing Page</title>
+  <title>Drive</title>
   <link href="../public/css/output.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body class="bg-neutral-50 text-gray-900">
 
-  <!-- Header -->
-  <header class="bg-black text-white">
-    <div class="container mx-auto flex justify-between items-center px-6 py-5">
-      <h1 class="text-3xl font-extrabold tracking-wide">Drive</h1>
-      <nav class="flex gap-8 text-sm uppercase">
-        <a href="#work" class="hover:text-gray-300">Work</a>
-        <a href="#about" class="hover:text-gray-300">About</a>
-        <a href="#contact" class="hover:text-gray-300">Contact</a>
-      </nav>
-      <?php if ($is_logged_in): ?>
-  <a href="logout.php" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-medium">
-    Logout
-  </a>
-<?php endif; ?>
-
-    </div>
-  </header>
-
-  <!-- Hero -->
-  <section class="bg-gradient-to-b from-gray-100 to-gray-200 py-20">
-    <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 items-center gap-12">
-
-     <!-- Left content (headline + description) -->
-<div class="text-center md:text-left">
-  <h2 class="text-5xl md:text-6xl font-extrabold mb-6">
-    Logistics 2
-  </h2>
-  <p class="max-w-xl text-lg text-gray-600 mb-6">
-     A modern fleet and transportation management platform.  
-  <br> It seamlessly connects drivers and users while powering vehicle reservations,  
-  dispatching, trip performance monitoring, <br>and cost optimization all in one system.
-  </p>
-
-  <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-      <?php if ($is_logged_in): ?>
-    <!-- Logged-in: direct link -->
-    <a href="fleetvehiclemanagement/index.php" 
-       class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded text-white font-medium">
-      Become a Driver
+  <header id="mainHeader" class=" text-black fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b border-gray-700">
+  <div class="container mx-auto flex justify-between items-center px-6 py-2">
+    <a href="#main">
+   <h1 class="text-3xl font-extrabold tracking-wide">Drive</h1>
     </a>
-  <?php else: ?>
-    <!-- Not logged-in: open auth modal -->
-    
-  <?php endif; ?>
-
-    <!-- Make a Reservation Button (only if logged in) -->
+    <nav class="flex gap-8 text-sm uppercase">
+      <a href="#work" class="hover:text-gray-300">Work</a>
+      <a href="#about" class="hover:text-gray-300">About</a>
+      <a href="#contact" class="hover:text-gray-300">Contact</a>
+    </nav>
     <?php if ($is_logged_in): ?>
-      <a href="reservation/reserve.php" 
-         class="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded text-white font-medium">
-        Make a Reservation
+      <a href="logout.php" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded text-sm font-medium">
+        Logout
       </a>
     <?php endif; ?>
   </div>
-</div>
-
-<?php if (!$is_logged_in): ?>
-<!-- Right content (Sign In button only if not logged in) -->
-<div class="text-center md:text-right mt-6 md:mt-0">
-  <div class="flex justify-center md:justify-end">
-    <button id="heroSignInBtn" 
-      class="px-6 py-3 bg-orange-600 hover:bg-orange-500 rounded text-white font-medium">
-      Sign In to Continue
-    </button>
-  </div>
-</div>
-<?php endif; ?>
+  </header>
 
 
+<!-- Hero -->
+<section id="main" class="bg-gradient-to-b from-gray-100 to-gray-200 pt-32 py-20">
+  <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 items-center gap-12">
+    
+    <!-- Left content (headline + description) -->
+    <div class="text-center md:text-left">
+      <h2 class="text-5xl md:text-6xl font-extrabold mb-6">
+        Logistics 2
+      </h2>
+      <p class="max-w-xl text-lg text-gray-600 mb-6">
+        A modern fleet and transportation management platform.  
+        <br> It seamlessly connects drivers and users while powering vehicle reservations,  
+        dispatching, trip performance monitoring, <br>and cost optimization all in one system.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+        <?php if ($is_logged_in): ?>
+          <!-- Logged-in: direct link -->
+          <a href="fleetvehiclemanagement/index.php" 
+            class="px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded text-white font-medium">
+            Become a Driver
+          </a>
+
+          <!-- Make a Reservation Button -->
+          <a href="reservation/reserve.php" 
+            class="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded text-white font-medium">
+            Make a Reservation
+          </a>
+        <?php else: ?>
+          <!-- Not logged-in: Sign In button below -->
+          <button id="heroSignInBtn" 
+            class="px-6 py-3 bg-orange-600 hover:bg-orange-500 rounded text-white font-medium">
+            Sign In to Continue
+          </button>
+        <?php endif; ?>
       </div>
-
     </div>
-  </section>
+
+    <!-- Right content (kept for future use, hidden if not needed) -->
+    <div class="text-center md:text-right mt-6 md:mt-0">
+      <?php if ($is_logged_in): ?>
+        <!-- You can place dashboard info, profile, or other content here later -->
+        <p class="text-gray-600">Welcome back, Driver!</p>
+      <?php endif; ?>
+    </div>
+
+  </div>
+</section>
+
 
 
 <!-- Balanced "Our Work" section: left-aligned title, pyramid layout, consistent card size, better spacing -->
-<section id="work" class="py-16 bg-gradient-to-br from-gray-50 to-gray-100">
-  <div class="container mx-auto px-4">
+<section id="work" class="scroll-mt-24 py-16 bg-gradient-to-br from-gray-50 to-gray-100">
+  <div class="container mx-auto px-6">
     <h3 class="text-3xl md:text-4xl font-extrabold mb-8 text-left text-gray-900 tracking-tight">
       Our Work
     </h3>
@@ -193,20 +189,19 @@ $is_logged_in = isset($_SESSION['user_id']);
 
 
   <!-- About -->
-  <section id="about" class="py-16 bg-neutral-100">
+  <section id="about" class="scroll-mt-24 py-16 bg-neutral-100">
     <div class="container mx-auto px-6 text-center">
       <h3 class="text-3xl font-bold mb-6">About Us</h3>
       <p class="max-w-3xl mx-auto text-gray-700">
-        We are your modern logistics and project management partner. Whether you're a user looking to book 
-        or a driver wanting opportunities, this system bridges the gap.
+        We are the logistics 2 group that been assigned to create a web application that will help users to manage their fleet and transportation needs. Our platform is designed to streamline operations, improve efficiency, and enhance the overall experience for both drivers and users. With a focus on innovation and user-centric design, we aim to revolutionize the way logistics and transportation are managed in today's fast-paced world.
       </p>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer id="contact" class="bg-black text-white py-8">
+  <footer id="contact" class="scroll-mt-24 bg-black text-white py-8">
     <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-      <p class="text-sm">© 2025 Project Management System. All Rights Reserved.</p>
+      <p class="text-sm">GAWA KO TO BWAHAH</p>
       <div class="flex gap-6 text-sm">
         <a href="#" class="hover:text-gray-400">WhatsApp</a>
         <a href="#" class="hover:text-gray-400">Instagram</a>
@@ -220,11 +215,9 @@ $is_logged_in = isset($_SESSION['user_id']);
 
     <!-- Left side (Branding / Title) -->
     <div class="w-full md:w-3/5 flex flex-col justify-center items-center bg-black text-white p-8">
-      <div class="flex items-center mb-6">
-        <i class="fab fa-google text-4xl text-blue-500"></i>
-      </div>
-      <h2 class="text-2xl font-semibold mb-2">Sign in</h2>
-      <p class="text-sm text-gray-300">Use your account</p>
+    
+    <h2 id="authTitle" class="text-2xl font-semibold mb-2">Sign in</h2>
+    <p id="authSubtitle" class="text-sm text-gray-300">Use your account</p>
     </div>
 
     <!-- Right side (Form) -->
@@ -256,7 +249,7 @@ $is_logged_in = isset($_SESSION['user_id']);
               Create account
             </button>
             <input type="submit" name="signIn" value="Login"
-                   class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-500 transition cursor-pointer">
+                   class="bg-orange-600 text-white px-6 py-2 rounded hover:bg-orange-500 transition cursor-pointer">
           </div>
         </form>
       </div>
@@ -320,55 +313,32 @@ $is_logged_in = isset($_SESSION['user_id']);
           <input type="hidden" name="role" value="user">
 
           <input type="submit" name="signUp" value="Sign Up"
-                 class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-500 transition cursor-pointer">
+                 class="bg-orange-600 text-white px-6 py-2 rounded hover:bg-orange-500 transition cursor-pointer">
 
         </form>
-        <button type="button" id="goToSignIn" class="text-sm text-gray-700 font-medium hover:underline mt-2 self-end">
-          Already have an account? Sign in
-        </button>
+        <div class="text-sm text-gray-600 mt-2 text-center">
+          Already have an account? 
+          <button 
+            type="button" 
+            id="goToSignIn" 
+            class="text-blue-600 font-medium hover:underline"
+          >
+            Sign in
+          </button>
+          </div>
+
       </div>
 
     </div>
   </div>
 </div>
 
-<script src="index.js" defer></script>
 <!-- JS for modal -->
-<script>
-  const modal = document.getElementById("authModal");
-  const heroSignInBtn = document.getElementById("heroSignInBtn");
-  const closeBtn = document.getElementById("closeAuthModal");
-  const signInForm = document.getElementById("signInForm");
-  const signUpForm = document.getElementById("signUpForm");
-  const goToSignUp = document.getElementById("goToSignUp");
-  const goToSignIn = document.getElementById("goToSignIn");
-
-  if (heroSignInBtn) heroSignInBtn.addEventListener("click", () => modal.classList.remove("hidden"));
-  if (closeBtn) closeBtn.addEventListener("click", () => modal.classList.add("hidden"));
-
-  if (goToSignUp && goToSignIn) {
-    goToSignUp.addEventListener("click", () => {
-      signInForm.classList.add("hidden");
-      signUpForm.classList.remove("hidden");
-    });
-    goToSignIn.addEventListener("click", () => {
-      signUpForm.classList.add("hidden");
-      signInForm.classList.remove("hidden");
-    });
-  }
-
-const becomeDriverBtn = document.getElementById("becomeDriverBtn");
-
-if (becomeDriverBtn) {
-  becomeDriverBtn.addEventListener("click", () => {
-    // Show the Sign Up form by default
-    document.getElementById("signInForm").classList.add("hidden");
-    document.getElementById("signUpForm").classList.remove("hidden");
-    modal.classList.remove("hidden");
-  });
-}
-
-</script>
-
+<script src="javascriptsindex/auth-modal.js"></script>
+<script src="javascriptsindex/scroll.js"></script>
+<script src="javascriptsindex/header.js"></script>
+<script src="javascriptsindex/work.js"></script>
+<script src="javascriptsindex/form-validation.js"></script>
+<script src="javascriptsindex/mainheader.js"></script>
 </body>
 </html>
