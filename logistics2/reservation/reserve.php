@@ -112,7 +112,7 @@ $vehicles_grouped = get_vehicles_grouped($dbh, $user_id);
               <h2 class="text-lg font-semibold text-gray-700 border-b pb-2">Trip Locations</h2>
               <div>
                 <br>
-                <input type="text" id="trip_locations" name="trip_locations" placeholder="Click to select pick-up & drop-off" readonly class="w-full border rounded-lg px-3 py-2 cursor-pointer bg-gray-50" />
+                <input type="text" id="trip_locations" name="trip_locations" placeholder="Click to select pick-up & drop-off" readonly required class="w-full border rounded-lg px-3 py-2 cursor-pointer bg-gray-50" />
               </div>
              
             </div>
@@ -167,11 +167,11 @@ $vehicles_grouped = get_vehicles_grouped($dbh, $user_id);
                 </div>
                 <div>
                   <label for="pickup_time" class="block font-medium mb-1">Pick-up Time <span class="text-gray-400">(optional)</span></label>
-                  <input type="time" id="pickup_datetime" name="pickup_datetime" class="w-full border rounded-lg px-3 py-2" />
+                  <input type="time" id="pickup_datetime" name="pickup_datetime" required class="w-full border rounded-lg px-3 py-2" />
                 </div>
                 <div>
                   <label for="dropoff_time" class="block font-medium mb-1">Drop-off Time <span class="text-gray-400">(optional)</span></label>
-                  <input type="time" id="dropoff_datetime" name="dropoff_datetime" class="w-full border rounded-lg px-3 py-2" />
+                  <input type="time" id="dropoff_datetime" name="dropoff_datetime" required class="w-full border rounded-lg px-3 py-2" />
                 </div>
               </div>
               
