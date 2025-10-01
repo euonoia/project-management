@@ -5,16 +5,17 @@
      class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
 
   <!-- Modal Box -->
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl mx-4 sm:mx-auto flex flex-col max-h-[80vh]">
-
-    <!-- Header -->
-    <div class="flex justify-between items-center bg-gray-50 px-6 py-4 border-b rounded-t-2xl flex-shrink-0">
-      <strong class="text-xl font-semibold text-blue-700">Travel History</strong>
-      <button type="button" 
-              onclick="document.getElementById('travelHistoryModal').classList.add('hidden')" 
-              class="text-gray-600 hover:text-red-500 text-2xl font-bold transition-colors">&times;</button>
-    </div>
-
+  <div 
+  class="bg-white shadow-2xl w-full max-w-3xl mx-4 sm:mx-auto flex flex-col max-h-[80vh]" 
+  style="border-radius: 1rem; overflow: hidden;" >
+   
+  <!-- Header -->
+       <div class="flex justify-between items-center bg-gray-50 px-6 py-4 border-b flex-shrink-0">
+        <strong class="text-xl font-semibold text-blue-700">Travel History</strong>
+        <button type="button" 
+                onclick="document.getElementById('travelHistoryModal').classList.add('hidden')" 
+                class="text-gray-600 hover:text-red-500 text-2xl font-bold transition-colors">&times;</button>
+        </div>
     <!-- Search & Filter Row -->
     <div class="px-6 py-3 border-b bg-white flex flex-col sm:flex-row items-center gap-3 flex-shrink-0">
       <!-- Search -->
@@ -45,9 +46,13 @@
       </div>
 
       <!-- Clear -->
-      <button id="clearFilters" class="px-3 py-2 text-sm bg-gray-100 rounded-lg hover:bg-gray-200">
-        Clear
-      </button>
+      <button id="clearFilters" 
+        class="px-4 py-2 text-sm font-medium text-gray-700 
+                bg-gray-100 border border-gray-300 rounded-lg 
+                hover:bg-gray-200 hover:text-gray-900 
+                transition-colors duration-200">
+        Clear 
+        </button>
     </div>
 
     <!-- Scrollable Content -->
@@ -62,38 +67,41 @@
             $badgeColor = $status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
             $statusIcon = $status === 'completed' ? 'fas fa-flag-checkered' : 'fas fa-times-circle';
           ?>
+
+          <!--this is the reservation card-->
         <div 
-            class="trip-card relative bg-gray-50 p-5 rounded-xl shadow hover:shadow-lg transition transform hover:-translate-y-1 mb-4"
+            class="trip-card relative bg-white border border-gray-200 p-6 
+                    shadow-md hover:shadow-xl transition transform hover:-translate-y-1 mb-6"
+            style="border-radius: 1.25rem; box-shadow: 0 4px 10px rgba(0,0,0,0.08);"
             data-date="<?= $tripDate ?>"
             data-text="<?= strtolower($res['reservation_ref'].' '.$res['pickup_location'].' '.$res['dropoff_location']) ?>"
             >
             <!-- Status Badge -->
-            <span class="absolute top-4 right-4 inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold <?= $badgeColor ?>">
+            <span class="absolute top-4 right-4 inline-flex items-center px-3 py-1 
+                        rounded-full text-xs font-medium tracking-wide <?= $badgeColor ?>">
                 <i class="<?= $statusIcon ?> mr-1"></i>
                 <?= ucfirst($res['status']) ?>
             </span>
 
             <!-- Reservation Info -->
-            <p class="font-semibold text-lg text-gray-900 mt-6">
-                <?= e($res['reservation_ref']) ?>
-            </p>
-            <p class="text-gray-600 text-sm mb-3">
-                <?= e(date('M d, Y', strtotime($res['trip_date']))) ?>
-            </p>
+            <div class="mb-4">
+                <p class="font-semibold text-lg text-gray-900"><?= e($res['reservation_ref']) ?></p>
+                <p class="text-gray-500 text-sm"><?= e(date('M d, Y', strtotime($res['trip_date']))) ?></p>
+            </div>
 
             <!-- Trip Details -->
-            <div class="text-gray-700 text-sm space-y-2">
+            <div class="space-y-3">
                 <div class="flex items-center space-x-3">
-                <i class="fas fa-map-marker-alt text-red-500 w-6 text-center"></i>
-                <span><strong>Pick-up:</strong> <?= e($res['pickup_location']) ?></span>
+                    <i class="fas fa-map-marker-alt text-red-500 w-5 text-center"></i>
+                    <span class="text-sm"><strong>Pick-up:</strong> <?= e($res['pickup_location']) ?></span>
                 </div>
                 <div class="flex items-center space-x-3">
-                <i class="fas fa-flag-checkered text-green-500 w-6 text-center"></i>
-                <span><strong>Drop-off:</strong> <?= e($res['dropoff_location']) ?></span>
+                    <i class="fas fa-flag-checkered text-green-500 w-5 text-center"></i>
+                    <span class="text-sm"><strong>Drop-off:</strong> <?= e($res['dropoff_location']) ?></span>
                 </div>
                 <div class="flex items-center space-x-3">
-                <i class="fas fa-clock text-gray-400 w-6 text-center"></i>
-                <span><strong>Time:</strong> <?= e(date('H:i', strtotime($res['pickup_datetime']))) ?> - <?= e(date('H:i', strtotime($res['dropoff_datetime']))) ?></span>
+                    <i class="fas fa-clock text-gray-400 w-5 text-center"></i>
+                    <span class="text-sm"><strong>Time:</strong> <?= e(date('H:i', strtotime($res['pickup_datetime']))) ?> - <?= e(date('H:i', strtotime($res['dropoff_datetime']))) ?></span>
                 </div>
             </div>
             </div>

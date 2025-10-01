@@ -38,6 +38,7 @@ $active_reservation = $active_reservations[0] ?? null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link rel="icon" href="../../logo/logo.png">
     <title>Reservation</title>
     <link rel="stylesheet" href="style.css">
     <link href="../../public/css/output.css" rel="stylesheet">

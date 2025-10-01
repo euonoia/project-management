@@ -94,7 +94,7 @@
   <input type="hidden" id="driver_earnings" name="driver_earnings">
   <input type="hidden" id="passenger_fare" name="passenger_fare">
   <input type="hidden" id="incentives" name="incentives">
-
+  
   <div class="pt-6 flex justify-between">
     <button type="button" onclick="showFareModal()" class="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">Create Reservation</button>
   </div>
