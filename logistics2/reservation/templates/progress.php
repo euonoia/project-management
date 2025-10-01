@@ -52,18 +52,27 @@
 
                     </div>
 
-                    <!-- Optional Action Buttons -->
-                   <div class="mt-4 flex justify-center space-x-3">
-                      <?php if ($status === 'pending'): ?>
-                          <button class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition w-full md:w-auto">View Details</button>
-                          <button class="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition w-full md:w-auto">Cancel</button>
-                      <?php elseif ($status === 'dispatched'): ?>
-                          <button class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition w-full md:w-auto">Track Vehicle</button>
-                      <?php endif; ?>
-                  </div>
-
+                  
+                <!-- Action Buttons -->
+                <div class="mt-4 self-end">
+                    <?php if ($status === 'pending'): ?>
+                        <button 
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition w-auto max-w-[200px]"
+                        >
+                            Cancel
+                        </button>
+                    <?php elseif ($status === 'dispatched'): ?>
+                        <button 
+                            class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition w-auto max-w-[200px]"
+                        >
+                            Track Vehicle
+                        </button>
+                    <?php endif; ?>
                 </div>
+                </div>
+                
             <?php endforeach; ?>
+            
         </div>
     <?php endif; ?>
 
