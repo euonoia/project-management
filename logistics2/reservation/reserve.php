@@ -45,7 +45,7 @@ $vehicles_grouped = get_vehicles_grouped($dbh, $user_id);
 <?php include 'templates/header.php'; ?>
 
         <!-- Hero Section with Create Reservation Form -->
-          <section id="work" class="bg-gradient-to-b from-gray-100 to-gray-200 py-20">
+    <section id="work" class="bg-gradient-to-b from-gray-100 to-gray-200 py-20">
   <div class="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 items-start gap-12">
 
     <!-- Left content -->
@@ -88,18 +88,15 @@ $vehicles_grouped = get_vehicles_grouped($dbh, $user_id);
 
   </div>
 </section>
+
   <!-- Reservation Progress Section -->
   <section id="progress" class="py-16 bg-white">
     <div class="container mx-auto px-6">
       <?php include 'templates/progress.php'; ?>
     </div>
   </section>
-
-  
   <!-- Footer -->
   <?php include 'templates/footer.php'; ?>
-
-
   <!-- Modals -->
   <?php include 'templates/modals/fare_modal.php'; ?>
   <?php include 'templates/modals/map_modal.php'; ?>
@@ -113,6 +110,5 @@ $vehicles_grouped = get_vehicles_grouped($dbh, $user_id);
 <script src="javascripts/stop.js" defer></script>
 <script src="javascripts/Auto-capacity.js" defer></script>
 <script src="javascripts/Vehicle_select.js" defer></script>
-
 </body>
 </html>
