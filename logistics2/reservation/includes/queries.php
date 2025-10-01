@@ -20,11 +20,39 @@ function get_vehicles(PDO $dbh, $user_id) {
 }
 
 // Fetch user's last 10 reservations
-function get_user_reservations(PDO $dbh, $user_id) {
-    $stmt = $dbh->prepare('SELECT id, reservation_ref, status, trip_date, pickup_datetime, dropoff_datetime FROM vehicle_reservations WHERE user_id = :uid ORDER BY pickup_datetime DESC LIMIT 10');
-    $stmt->execute([':uid' => $user_id]);
+function get_user_reservations(PDO $dbh, $user_id, array $statuses = ['Pending', 'Dispatched', 'Completed', 'Cancelled']) {
+    // Prepare placeholders for the IN clause
+    $inPlaceholders = implode(',', array_fill(0, count($statuses), '?'));
+
+    $sql = "
+        SELECT 
+            id, 
+            reservation_ref, 
+            status, 
+            trip_date, 
+            pickup_datetime, 
+            dropoff_datetime,
+            pickup_location,
+            dropoff_location
+        FROM vehicle_reservations 
+        WHERE user_id = ? 
+          AND status IN ($inPlaceholders)
+        ORDER BY pickup_datetime DESC
+        LIMIT 10
+    ";
+
+    $stmt = $dbh->prepare($sql);
+
+    // Merge user_id with statuses for positional parameters
+    $params = array_merge([$user_id], $statuses);
+
+    $stmt->execute($params);
+
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+
+
 
 // Fetch active reservation (not completed or cancelled)
 function get_active_reservation(PDO $dbh, $user_id) {
@@ -86,3 +114,4 @@ function get_available_vehicles(PDO $dbh, $user_id) {
 
 $availableVehicles = get_available_vehicles($dbh, $_SESSION['user_id']);
 ?>
+

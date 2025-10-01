@@ -21,11 +21,16 @@ $requester_name = $user ? $user['firstname'] . ' ' . $user['lastname'] : '';
 $flash = $_SESSION['flash'] ?? null; 
 unset($_SESSION['flash']);
 
-// Fetch vehicles, reservations
+// Fetch vehicles
 $vehicles = get_vehicles($dbh, $user_id);
-$user_reservations = get_user_reservations($dbh, $user_id);
-$active_reservation = get_active_reservation($dbh, $user_id);
 $vehicles_grouped = get_vehicles_grouped($dbh, $user_id);
+
+// Fetch reservations
+$active_reservations = get_user_reservations($dbh, $user_id, ['Pending', 'Dispatched']); // Active reservations
+$travel_history = get_user_reservations($dbh, $user_id, ['Completed', 'Cancelled']);      // Completed or cancelled
+
+// If you need a single active reservation (for checking form restrictions)
+$active_reservation = $active_reservations[0] ?? null;
 
 ?>
 <!DOCTYPE html>
@@ -89,17 +94,35 @@ $vehicles_grouped = get_vehicles_grouped($dbh, $user_id);
   </div>
 </section>
 
-  <!-- Reservation Progress Section -->
-  <section id="progress" class="py-16 bg-white">
-    <div class="container mx-auto px-6">
-      <?php include 'templates/progress.php'; ?>
-    </div>
-  </section>
+    <!-- Reservation Progress Section -->
+          <section id="progress" class="py-16 bg-white">
+          <div class="container mx-auto px-6">
+
+              <!-- Reservation Progress -->
+              <div>
+                  <?php include 'templates/progress.php'; ?>
+                  <br>
+                  <!-- Travel History Button aligned slightly to the right -->
+                  <div class="mt-6 flex justify-start">
+                      <button onclick="document.getElementById('travelHistoryModal').classList.remove('hidden');"
+                              class="px-6 py-3 bg-gray-800 text-white rounded hover:bg-gray-700 transition ml-6">
+                          View Travel History
+                      </button>
+                  </div>
+              </div>
+
+          </div>
+      </section>
+
+
+
+
   <!-- Footer -->
   <?php include 'templates/footer.php'; ?>
   <!-- Modals -->
   <?php include 'templates/modals/fare_modal.php'; ?>
   <?php include 'templates/modals/map_modal.php'; ?>
+  <?php include 'templates/modals/travel_history.php'; ?>
   
 <script>
   const vehiclesData = <?= json_encode($vehicles_grouped) ?>;
