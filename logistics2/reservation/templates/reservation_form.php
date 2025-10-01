@@ -4,12 +4,7 @@
     (<b><?= e($active_reservation['reservation_ref']) ?></b>) with status 
     <span class="font-semibold"><?= e($active_reservation['status']) ?></span>.<br>
     Please complete or cancel your current reservation before creating a new one.
-    <div class="mt-3">
-      <a href="view_reservation.php?id=<?= e($active_reservation['reservation_id']) ?>"
-         class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-         View Reservation
-      </a>
-    </div>
+   
   </div>
 
 <?php elseif (empty($vehicles)): ?>
