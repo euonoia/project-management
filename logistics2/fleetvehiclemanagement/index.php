@@ -184,18 +184,21 @@ if ($userId !== '' && isset($conn)) {
                         <label for="year">Year</label>
                         <input type="text" id="year" name="year" value="<?php echo htmlspecialchars($form['year'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" <?php echo !empty($form) ? 'readonly' : ''; ?> required>
                     </div>
-                    <div class="form-group">
-                        <label for="vehicle_type">Vehicle Type</label>
-                        <select id="vehicle_type" name="vehicle_type" <?php echo !empty($form) ? 'disabled' : ''; ?> required>
-                            <option value="">Select Vehicle Type</option>
-                            <option value="sedan" <?php echo (isset($form['vehicle_type']) && $form['vehicle_type']==='sedan')?'selected':''; ?>>Sedan</option>
-                            <option value="suv" <?php echo (isset($form['vehicle_type']) && $form['vehicle_type']==='suv')?'selected':''; ?>>SUV</option>
-                            <option value="hatchback" <?php echo (isset($form['vehicle_type']) && $form['vehicle_type']==='hatchback')?'selected':''; ?>>HatchBack</option>
-                            <option value="mpv" <?php echo (isset($form['vehicle_type']) && $form['vehicle_type']==='mpv')?'selected':''; ?>>MPV</option>
-                            <option value="van" <?php echo (isset($form['vehicle_type']) && $form['vehicle_type']==='van')?'selected':''; ?>>Van</option>
-                            <option value="others" <?php echo (isset($form['vehicle_type']) && $form['vehicle_type']==='others')?'selected':''; ?>>Others</option>
-                        </select>
+
+                   <div class="form-group">
+                    <label for="vehicle_type">Vehicle Type</label>
+                    <select id="vehicle_type" name="vehicle_type" 
+                            <?php echo !empty($form) ? 'disabled' : ''; ?> required>
+                        <option value="">Select Vehicle Type</option>
+                        <option value="sedan" <?php echo (isset($form['vehicle_type']) && $form['vehicle_type']==='sedan')?'selected':''; ?>>Sedan</option>
+                        <option value="suv" <?php echo (isset($form['vehicle_type']) && $form['vehicle_type']==='suv')?'selected':''; ?>>SUV</option>
+                        <option value="hatchback" <?php echo (isset($form['vehicle_type']) && $form['vehicle_type']==='hatchback')?'selected':''; ?>>Hatchback</option>
+                        <option value="mpv" <?php echo (isset($form['vehicle_type']) && $form['vehicle_type']==='mpv')?'selected':''; ?>>MPV</option>
+                        <option value="van" <?php echo (isset($form['vehicle_type']) && $form['vehicle_type']==='van')?'selected':''; ?>>Van</option>
+                        <option value="others" <?php echo (isset($form['vehicle_type']) && $form['vehicle_type']==='others')?'selected':''; ?>>Others</option>
+                    </select>
                     </div>
+
                     <div class="form-group">
                         <label for="color">Color</label>
                         <input type="text" id="color" name="color" value="<?php echo htmlspecialchars($form['color'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" <?php echo !empty($form) ? 'readonly' : ''; ?> required>
@@ -241,10 +244,13 @@ if ($userId !== '' && isset($conn)) {
                         <label for="tnvs_expiry">TNVS Expiry</label>
                         <input type="date" id="tnvs_expiry" name="tnvs_expiry" value="<?php echo htmlspecialchars($form['tnvs_expiry'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" <?php echo !empty($form['tnvs_expiry']) ? 'readonly' : ''; ?> required>
                     </div>
-                    <div class="form-group">
-                        <label for="passenger_capacity">Passenger Capacity</label>
-                        <input type="text" id="passenger_capacity" name="passenger_capacity" value="<?php echo htmlspecialchars($form['passenger_capacity'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" <?php echo !empty($form) ? 'readonly' : ''; ?> required>
+                  <div class="form-group">
+                    <label for="passenger_capacity">Passenger Capacity</label>
+                    <input type="text" id="passenger_capacity" name="passenger_capacity"
+                            value="<?php echo htmlspecialchars($form['passenger_capacity'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" 
+                            <?php echo !empty($form) ? 'readonly' : ''; ?> required>
                     </div>
+
                     <div class="form-group">
                         <label for="fuel_type">Fuel Type</label>
                         <select id="fuel_type" name="fuel_type" <?php echo !empty($form) ? 'disabled' : ''; ?> required>
@@ -364,6 +370,25 @@ if ($userId !== '' && isset($conn)) {
 
             updateHeaderForForm(document.getElementById('vehicle_registration_form'), 'vehicle');
             updateHeaderForForm(document.getElementById('insurance_registration_form'), 'insurance');
+        });
+        document.addEventListener("DOMContentLoaded", () => {
+        const vehicleType = document.getElementById("vehicle_type");
+        const passengerCapacity = document.getElementById("passenger_capacity");
+
+        // Map vehicle type → default capacity
+        const capacityMap = {
+            sedan: 5,
+            suv: 7,
+            hatchback: 5,
+            mpv: 7,
+            van: 15,
+            others: ''
+        };
+
+        vehicleType.addEventListener("change", () => {
+            const selected = vehicleType.value;
+            passengerCapacity.value = capacityMap[selected] ?? '';
+        });
         });
     </script>
 </body>

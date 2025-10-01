@@ -214,8 +214,8 @@ if ($export) {
         </div>
       </div>
       <nav class="sidenav">
-        <a href="index.php">Dashboard</a>
-        <a href="../../dispatchsystem/index.php">Reservations</a>
+        <a href="../index.php">Dashboard</a>
+        <a href="../../../dispatchsystem/index.php">Reservations</a>
         <a href="history.php" class="active">Travel Records</a>
         <a href="users.php">Users</a>
         <a href="drivers.php">Drivers</a>

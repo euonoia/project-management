@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     steps.forEach((el, idx) => {
       if (idx === step - 1) {
         el.style.display = "block";
-        el.style.zIndex = "2"; // active step on top
+        el.style.zIndex = "2";
         el.style.opacity = "0";
         el.style.transform = "translateX(50px)";
         requestAnimationFrame(() => {
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Update dots (active vs inactive)
+    // Update dots
     dots.forEach((dot, idx) => {
       if (idx === step - 1) {
         dot.style.backgroundColor = "#dd6b20";
@@ -51,22 +51,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Validate current step ---
   function validateStep(step) {
-    const inputs = steps[step - 1].querySelectorAll("input, select, textarea");
+    const stepEl = steps[step - 1];
+    const inputs = stepEl.querySelectorAll("input, select, textarea");
     let valid = true;
 
-    for (let input of inputs) {
+    // Special case: Step 2 (Vehicle Selection)
+    if (
+      step === 2 &&
+      (document.getElementById("vehicle_type").value === "" ||
+        document.getElementById("vehicle_registration_id").value === "" ||
+        document.getElementById("passengers_count").value === "")
+    ) {
+      valid = false;
+    }
+
+    // Check all required inputs
+    inputs.forEach(input => {
       if (input.hasAttribute("required") && !input.value.trim()) {
         input.classList.add("border-red-500");
-        input.focus();
-
-        steps[step - 1].classList.add("animate-shake");
-        setTimeout(() => steps[step - 1].classList.remove("animate-shake"), 500);
-
         valid = false;
-        break;
       } else {
         input.classList.remove("border-red-500");
       }
+    });
+
+    // Shake the whole step if invalid
+    if (!valid) {
+      stepEl.classList.add("animate-shake");
+      setTimeout(() => stepEl.classList.remove("animate-shake"), 500);
     }
 
     return valid;
@@ -74,16 +86,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- Dot navigation ---
   dots.forEach((dot, idx) => {
-    dot.style.cursor = "pointer"; // show clickable cursor
+    dot.style.cursor = "pointer";
     dot.addEventListener("click", () => {
-      // Allow backward always, forward only if validation passes
       if (idx + 1 <= currentStep || validateStep(currentStep)) {
         showStep(idx + 1);
+      } else {
+        steps[currentStep - 1].classList.add("animate-shake");
+        setTimeout(() => steps[currentStep - 1].classList.remove("animate-shake"), 500);
       }
     });
   });
 
-  // --- Keyboard handling (Enter = Next, Esc = close modal) ---
+  // --- Keyboard handling ---
   document.addEventListener("keydown", e => {
     const isMapModalOpen = mapModal && mapModal.style.display === "flex";
 
@@ -97,6 +111,9 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       if (currentStep < steps.length && validateStep(currentStep)) {
         showStep(currentStep + 1);
+      } else {
+        steps[currentStep - 1].classList.add("animate-shake");
+        setTimeout(() => steps[currentStep - 1].classList.remove("animate-shake"), 500);
       }
     }
 
@@ -113,17 +130,15 @@ document.addEventListener("DOMContentLoaded", () => {
     el.style.transform = "translateX(50px)";
     el.style.display = "none";
 
-    // 🔑 Keep steps stacked in same card
     el.style.position = "absolute";
     el.style.top = "0";
     el.style.left = "0";
     el.style.width = "100%";
   });
 
-  // make sure parent container is relative so absolute steps stay inside
   if (steps[0] && steps[0].parentElement) {
     steps[0].parentElement.style.position = "relative";
-    steps[0].parentElement.style.minHeight = "120px"; // adjust for content
+    steps[0].parentElement.style.minHeight = "120px";
   }
 
   document.body.classList.add("initial-load");

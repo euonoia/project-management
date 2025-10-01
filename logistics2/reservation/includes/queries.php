@@ -32,3 +32,57 @@ function get_active_reservation(PDO $dbh, $user_id) {
     $stmt->execute([':uid' => $user_id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
+
+function get_vehicles_grouped(PDO $dbh, $user_id) {
+    $stmt = $dbh->prepare("
+        SELECT registration_id, vehicle_plate, car_brand, model, vehicle_type, 
+               COALESCE(NULLIF(passenger_capacity,''), NULL) AS passenger_capacity
+        FROM vehicles
+        WHERE user_id != :uid
+        ORDER BY vehicle_type, vehicle_plate ASC
+    ");
+    $stmt->execute([':uid' => $user_id]);
+
+    $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Group by vehicle_type for quick lookup
+    $grouped = [];
+    foreach ($vehicles as $v) {
+        $type = strtolower($v['vehicle_type']);
+        if (!isset($grouped[$type])) {
+            $grouped[$type] = [];
+        }
+        $grouped[$type][] = $v;
+    }
+    return $grouped;
+}
+
+function get_available_vehicles(PDO $dbh, $user_id) {
+    $stmt = $dbh->prepare("
+        SELECT v.registration_id, v.vehicle_plate, v.car_brand, v.model, v.vehicle_type,
+               COALESCE(NULLIF(v.passenger_capacity,''), 1) AS passenger_capacity
+        FROM vehicles v
+        WHERE v.user_id != :uid
+          AND NOT EXISTS (
+              SELECT 1
+              FROM vehicle_reservations r
+              WHERE r.vehicle_registration_id = v.registration_id
+              AND r.status NOT IN ('Completed', 'Cancelled')
+          )
+        ORDER BY v.vehicle_type, v.vehicle_plate ASC
+    ");
+    $stmt->execute([':uid' => $user_id]);
+    $vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Group by type for frontend
+    $grouped = [];
+    foreach ($vehicles as $v) {
+        $type = strtolower($v['vehicle_type']);
+        if (!isset($grouped[$type])) $grouped[$type] = [];
+        $grouped[$type][] = $v;
+    }
+    return $grouped;
+}
+
+$availableVehicles = get_available_vehicles($dbh, $_SESSION['user_id']);
+?>
