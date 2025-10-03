@@ -2,110 +2,47 @@
 session_start();
 include('../../../database/connect.php');
 
-// Require login (optionally enforce admin role if available)
+// Require login
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
 }
-$session_role = $_SESSION['role'] ?? 'user';
-$user_name = trim((($_SESSION['firstname'] ?? '') . ' ' . ($_SESSION['lastname'] ?? '')));
-if ($user_name === '') $user_name = 'User';
 
-// Helper: HTML escape
+$user_id = $_SESSION['user_id'];
+
+// Verify admin in the admin table
+$stmt = $conn->prepare("SELECT id, firstname, lastname FROM admin WHERE firebase_uid = ?");
+if (!$stmt) {
+    die("Prepare failed: (" . $conn->errno . ") " . $conn->error);
+}
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows === 0) {
+    header('HTTP/1.1 403 Forbidden');
+    echo "You do not have permission to access this page.";
+    exit();
+}
+
+$admin = $result->fetch_assoc();
+$user_name = trim($admin['firstname'] . ' ' . $admin['lastname']);
+if ($user_name === '') $user_name = 'Admin';
+
+// Optional: set session role explicitly
+$_SESSION['role'] = 'admin';
+
+// HTML escape helper
 function e($str) { return htmlspecialchars((string)$str, ENT_QUOTES, 'UTF-8'); }
 
-// Resolve current schema name
+// Get DB name
 try {
     $dbName = $dbh->query('SELECT DATABASE()')->fetchColumn();
 } catch (Throwable $e) {
     $dbName = '';
 }
 
-// Fetch all base tables in the current schema
-$tables = [];
-try {
-    $tables = $dbh->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN);
-} catch (Throwable $e) {}
-
-// Ensure selected table is valid
-$selected = isset($_GET['t']) ? (string)$_GET['t'] : '';
-if (!$selected || !in_array($selected, $tables, true)) {
-    $selected = $tables[0] ?? '';
-}
-
-// Pagination & search
-$page = max(1, (int)($_GET['p'] ?? 1));
-$pageSize = max(1, min(200, (int)($_GET['ps'] ?? 25)));
-$offset = ($page - 1) * $pageSize;
-$kw = trim((string)($_GET['q'] ?? ''));
-$export = isset($_GET['export']) && $_GET['export'] === '1';
-
-// Load column metadata for selected table
-$columns = [];
-$searchableCols = [];
-if ($selected) {
-    try {
-        $columns = $dbh->query('DESCRIBE `'.$selected.'`')->fetchAll(PDO::FETCH_ASSOC);
-        // Determine searchable text-like columns
-        foreach ($columns as $col) {
-            $type = strtolower((string)$col['Type']);
-            if (strpos($type, 'char') !== false || strpos($type, 'text') !== false || strpos($type, 'enum') !== false) {
-                $searchableCols[] = $col['Field'];
-            }
-        }
-    } catch (Throwable $e) {}
-}
-
-// Build SQL for list & count
-$totalRows = 0;
-$rows = [];
-if ($selected) {
-    try {
-        $where = '';
-        $params = [];
-        if ($kw !== '' && !empty($searchableCols)) {
-            $likes = [];
-            foreach ($searchableCols as $c) { $likes[] = '`'.$c.'` LIKE :kw'; }
-            $where = ' WHERE ' . implode(' OR ', $likes);
-            $params[':kw'] = '%'.$kw.'%';
-        }
-        // Total count
-        $stmt = $dbh->prepare('SELECT COUNT(*) FROM `'.$selected.'`' . $where);
-        $stmt->execute($params);
-        $totalRows = (int)$stmt->fetchColumn();
-
-        // Data
-        $sql = 'SELECT * FROM `'.$selected.'`' . $where . ' LIMIT :lim OFFSET :off';
-        $stmt = $dbh->prepare($sql);
-        foreach ($params as $k=>$v) { $stmt->bindValue($k, $v, PDO::PARAM_STR); }
-        $stmt->bindValue(':lim', $pageSize, PDO::PARAM_INT);
-        $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // CSV export
-        if ($export) {
-            header('Content-Type: text/csv');
-            header('Content-Disposition: attachment; filename="'.$selected.'_export.csv"');
-            $out = fopen('php://output', 'w');
-            // header row
-            if (!empty($columns)) {
-                fputcsv($out, array_map(function($c) { return $c['Field']; }, $columns));
-            } elseif (!empty($rows)) {
-                fputcsv($out, array_keys($rows[0]));
-            } else {
-                fputcsv($out, []);
-            }
-            foreach ($rows as $r) { fputcsv($out, array_values($r)); }
-            fclose($out);
-            exit();
-        }
-    } catch (Throwable $e) {
-        // Ignore for UI, show error panel
-    }
-}
-
-// Quick entity counts for summary
+// Quick entity counts
 function safe_count(PDO $dbh, $table) {
     try { return (int)$dbh->query('SELECT COUNT(*) FROM `'.$table.'`')->fetchColumn(); } catch (Throwable $e) { return 0; }
 }
@@ -115,6 +52,7 @@ $cntDocs = safe_count($dbh, 'documents');
 $cntIns = safe_count($dbh, 'vehicle_insurance');
 $cntRes = safe_count($dbh, 'vehicle_reservations');
 
+// Reservation status counts
 $stCounts = ['Pending'=>0,'Approved'=>0,'Dispatched'=>0,'Completed'=>0,'Cancelled'=>0];
 try {
     foreach ($dbh->query('SELECT status, COUNT(*) c FROM vehicle_reservations GROUP BY status')->fetchAll(PDO::FETCH_ASSOC) as $r) {
@@ -123,6 +61,7 @@ try {
     }
 } catch (Throwable $e) {}
 ?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -170,10 +109,14 @@ try {
           <div class="muted" style="font-size:14px">Welcome, <?php echo e($user_name); ?></div>
           <div style="font-weight:800; font-size:18px; letter-spacing:.3px">System Overview</div>
         </div>
-        <div class="userbox">
-          <span class="pill"><?php echo e(strtoupper($session_role)); ?></span>
-          <div class="avatar"><?php echo e(strtoupper(substr($user_name,0,1))); ?></div>
-        </div>
+       <div class="userbox">
+    <!-- Display the role in uppercase -->
+    <span class="pill"><?php echo strtoupper($_SESSION['role'] ?? 'USER'); ?></span>
+
+    <!-- Display first letter of the name in uppercase -->
+    <div class="avatar"><?php echo strtoupper(substr($user_name ?? 'User', 0, 1)); ?></div>
+</div>
+
       </header>
       <main class="content">
    
