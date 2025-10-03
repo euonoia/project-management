@@ -111,7 +111,6 @@ $active_reservation = $active_reservations[0] ?? null;
                       </button>
                   </div>
               </div>
-
           </div>
       </section>
 
