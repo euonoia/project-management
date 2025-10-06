@@ -1,4 +1,5 @@
 <?php
+session_name('user_session');
 session_start();
 include('../../database/connect.php');
 include('includes/helpers.php');

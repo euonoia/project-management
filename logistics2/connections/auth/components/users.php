@@ -9,7 +9,7 @@
 header('X-Frame-Options: DENY');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: strict-origin-when-cross-origin');
-
+session_name('admin_session');
 session_start();
 require_once('../../../../database/connect.php');
 

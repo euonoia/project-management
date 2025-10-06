@@ -1,7 +1,7 @@
 <?php
 // Authentication handler for signup and signin
 // Sets session variables so other pages (e.g., Fleet Vehicle Management) can display the current user's name
-
+session_name('user_session');
 session_start();
 include('../../../database/connect.php');
 

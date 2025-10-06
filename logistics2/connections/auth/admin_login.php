@@ -5,6 +5,7 @@
 // - Establishes PHP session used by mwhehe.php (admin panel)
 
 header('Content-Type: application/json');
+session_name('admin_session');
 session_start();
 
 try {

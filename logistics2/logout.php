@@ -1,5 +1,6 @@
 <?php
 // Start the session
+session_name('user_session');
 session_start();
 
 // Unset all session variables
