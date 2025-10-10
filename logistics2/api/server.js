@@ -143,39 +143,98 @@ app.get("/assigned-customers/:user_id", (req, res) => {
 
 app.get("/travel-history/:user_id", (req, res) => {
   const { user_id } = req.params;
-  // Get driver's name
-  db.query(
-    "SELECT firstname, lastname FROM users WHERE user_id = ? LIMIT 1",
-    [user_id],
-    (err, users) => {
-      if (err || users.length === 0) return res.json([]);
-      const driverName = users[0].firstname + ' ' + users[0].lastname;
-      // Fetch completed reservations for this driver
-      const sql = `
-        SELECT 
-          vr.reservation_ref,
-          vr.trip_date,
-          vr.pickup_location,
-          vr.dropoff_location,
-          vr.status,
-          v.vehicle_plate,
-          v.car_brand,
-          v.model,
-          ca.driver_earnings
-        FROM vehicle_reservations vr
-        JOIN vehicles v ON vr.vehicle_registration_id = v.registration_id
-        LEFT JOIN cost_analysis ca ON ca.reservation_ref = vr.reservation_ref
-        WHERE vr.assigned_driver = ?
-          AND vr.status = 'Completed'
-        ORDER BY vr.pickup_datetime DESC
-      `;
-      db.query(sql, [driverName], (err2, results) => {
-        if (err2) return res.json({ success: false, message: "DB error" });
-        res.json(results);
-      });
-    }
-  );
+
+  const sql = `
+    SELECT 
+      vr.reservation_ref,
+      vr.trip_date,
+      vr.pickup_location,
+      vr.dropoff_location,
+      vr.status,
+      v.vehicle_plate,
+      v.car_brand,
+      v.model,
+      ca.driver_earnings
+    FROM vehicle_reservations vr
+    JOIN vehicles v ON vr.vehicle_registration_id = v.registration_id
+    LEFT JOIN cost_analysis ca ON ca.reservation_ref = vr.reservation_ref
+    WHERE vr.assigned_driver = ?
+      AND vr.status = 'Completed'
+    ORDER BY vr.pickup_datetime DESC
+  `;
+
+  db.query(sql, [user_id], (err, results) => {
+    if (err) return res.json({ success: false, message: "DB error" });
+    res.json(results);
+  });
 });
+
+
+// GET total earnings for the logged-in user
+app.get("/user/:user_id/total-earnings", (req, res) => {
+  const { user_id } = req.params;
+
+  if (!user_id) {
+    return res.status(400).json({ success: false, message: "User ID is required" });
+  }
+
+  const sql = `
+    SELECT 
+      u.user_id,
+      CONCAT(u.firstname, ' ', u.lastname) AS user_name,
+      COALESCE(SUM(ca.driver_earnings), 0) AS total_earnings
+    FROM users u
+    INNER JOIN vehicles v 
+      ON v.user_id = u.user_id
+    INNER JOIN cost_analysis ca
+      ON ca.registration_id = v.registration_id
+    WHERE u.user_id = ?
+    GROUP BY u.user_id
+    LIMIT 1
+  `;
+
+  db.query(sql, [user_id], (err, results) => {
+    if (err) {
+      console.error("DB Error (fetch total earnings):", err);
+      return res.status(500).json({ success: false, message: "Database error" });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ success: false, message: "User or earnings not found" });
+    }
+
+    res.json({
+      success: true,
+      user_id: results[0].user_id,
+      user_name: results[0].user_name,
+      total_earnings: parseFloat(results[0].total_earnings).toFixed(2),
+    });
+  });
+});
+
+// GET total assigned rides including current driver
+app.get("/user/:user_id/assigned-count", (req, res) => {
+  const { user_id } = req.params;
+
+  const driverQuery = `SELECT CONCAT(firstname, ' ', lastname) AS driver_name FROM users WHERE user_id = ? LIMIT 1`;
+
+  db.query(driverQuery, [user_id], (err, users) => {
+    if (err) return res.status(500).json({ success: false, message: "Database error" });
+    if (users.length === 0) return res.status(404).json({ success: false, message: "Driver not found" });
+
+    const driverName = users[0].driver_name;
+
+    // This query counts **all reservations assigned to this driver including current**
+    const countQuery = `SELECT COUNT(*) AS assigned_count FROM vehicle_reservations WHERE assigned_driver = ?`;
+
+    db.query(countQuery, [driverName], (err2, results) => {
+      if (err2) return res.status(500).json({ success: false, message: "Database error" });
+
+      res.json({ success: true, assigned_count: results[0].assigned_count });
+    });
+  });
+});
+
 
 const PORT = 5000;
 const HOST = '0.0.0.0'; // Listen on all network interfaces

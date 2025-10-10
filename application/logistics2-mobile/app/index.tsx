@@ -24,39 +24,40 @@ export default function LoginScreen() {
   }, []);
 
   const handleLogin = async () => {
-    console.log('Login button pressed');
-    try {
-      const res = await fetch('http://192.168.1.12:5000/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      console.log('Server response:', data);
-      if (data.success && data.role === 'driver') {
-        // Save to AsyncStorage
-        await AsyncStorage.setItem('driver', JSON.stringify({
+  console.log("Login button pressed");
+  try {
+    const res = await fetch("http://192.168.1.12:5000/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+    console.log("Server response:", data);
+
+    if (data.success && data.role === "driver") {
+      // Save driver data
+      await AsyncStorage.setItem(
+        "driver",
+        JSON.stringify({
           user_id: data.user_id,
           firstname: data.firstname,
           lastname: data.lastname,
-        }));
-        Alert.alert(`Login Success`, `Welcome, Driver ${data.firstname} ${data.lastname}!`);
-        router.replace({
-          pathname: '/(tabs)/home',
-          params: {
-            firstname: data.firstname,
-            lastname: data.lastname,
-          },
-        });
-      } else if (data.success) {
-        Alert.alert('Access Denied', 'Only drivers can log in here.');
-      } else {
-        Alert.alert('Login Failed', data.message || 'Invalid credentials');
-      }
-    } catch (err) {
-      Alert.alert('Error', 'Could not connect to server.');
+        })
+      );
+
+      // Instantly navigate to driver home screen
+      router.replace("/(tabs)/home");
+    } else if (data.success) {
+      console.log("Access Denied: Only drivers can log in here.");
+    } else {
+      console.log("Login Failed:", data.message || "Invalid credentials");
     }
-  };
+  } catch (err) {
+    console.log("Error: Could not connect to server.", err);
+  }
+};
+
 
   return (
     <View style={styles.container}>

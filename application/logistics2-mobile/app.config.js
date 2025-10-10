@@ -40,6 +40,7 @@ export default {
     experiments: { typedRoutes: true },
     extra: {
       orsApiKey: process.env.ORS_API_KEY, 
+       API_URL: process.env.API_URL,
     },
   },
 };
