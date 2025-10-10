@@ -1,4 +1,7 @@
 <?php
+session_name('admin_session');
+session_start();
+
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../connections/auth/login.php');
     exit();
@@ -12,8 +15,9 @@ try {
     $stmt->bind_param("s", $user_id);
     $stmt->execute();
     $stmt->store_result();
-    if ($stmt->num_rows > 0) $isAdmin = true;
+    $isAdmin = $stmt->num_rows > 0;
     $stmt->close();
 } catch (Exception $e) {
     error_log("Admin check failed: " . $e->getMessage());
 }
+?>

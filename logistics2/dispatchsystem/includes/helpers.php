@@ -11,3 +11,4 @@ function to_mysql_dt($val) {
 }
 
 function flash($type, $msg) { $_SESSION['flash'] = ['type' => $type, 'msg' => $msg]; }
+?>
