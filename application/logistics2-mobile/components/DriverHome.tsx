@@ -13,8 +13,13 @@ import { useRouter } from "expo-router";
 import Constants from "expo-constants";
 
 const { width } = Dimensions.get("window");
-const API_URL = Constants.manifest?.extra?.apiUrl || "http://192.168.1.12:5000"; // fallback
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
+if (!API_URL) {
+  throw new Error(
+    "API_URL not defined. Please set API_BASE_URL in your .env and rebuild the app."
+  );
+}
 // Types
 interface Driver {
   firstname?: string;

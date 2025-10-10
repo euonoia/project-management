@@ -17,9 +17,9 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import MapModal from "../components/MapModal";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
-import Constants from "expo-constants"; // ✅ Added for .env / extra config
-
+import Constants  from "expo-constants";
 const { width, height } = Dimensions.get("window");
+const API_URL = Constants.expoConfig?.extra?.API_URL;
 
 // --- Responsive scaling helper
 const scaleFont = (size: number) => {
@@ -59,9 +59,6 @@ interface TravelHistoryItem {
   driver_earnings?: number;
 }
 
-// ✅ Get API base URL from Expo Constants
-const API_BASE_URL = Constants.manifest?.extra?.API_BASE_URL;
-
 export default function AssignedUser({ navigation }: any) {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +80,7 @@ export default function AssignedUser({ navigation }: any) {
         const user = await AsyncStorage.getItem("driver");
         if (!user) return;
         const { user_id } = JSON.parse(user);
-        const res = await fetch(`${API_BASE_URL}/assigned-customers/${user_id}`);
+        const res = await fetch(`${API_URL}/assigned-customers/${user_id}`);
         const data = await res.json();
 
         const normalized: Customer[] = (Array.isArray(data) ? data : []).map((item: any) => {
@@ -124,7 +121,7 @@ export default function AssignedUser({ navigation }: any) {
       const user = await AsyncStorage.getItem("driver");
       if (!user) return;
       const { user_id } = JSON.parse(user);
-      const res = await fetch(`${API_BASE_URL}/travel-history/${user_id}`);
+      const res = await fetch(`${API_URL}/travel-history/${user_id}`);
       const data = await res.json();
       setHistory(data);
     } catch (err) {
