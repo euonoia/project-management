@@ -143,32 +143,39 @@ app.get("/assigned-customers/:user_id", (req, res) => {
 
 app.get("/travel-history/:user_id", (req, res) => {
   const { user_id } = req.params;
-
-  const sql = `
-    SELECT 
-      vr.reservation_ref,
-      vr.trip_date,
-      vr.pickup_location,
-      vr.dropoff_location,
-      vr.status,
-      v.vehicle_plate,
-      v.car_brand,
-      v.model,
-      ca.driver_earnings
-    FROM vehicle_reservations vr
-    JOIN vehicles v ON vr.vehicle_registration_id = v.registration_id
-    LEFT JOIN cost_analysis ca ON ca.reservation_ref = vr.reservation_ref
-    WHERE vr.assigned_driver = ?
-      AND vr.status = 'Completed'
-    ORDER BY vr.pickup_datetime DESC
-  `;
-
-  db.query(sql, [user_id], (err, results) => {
-    if (err) return res.json({ success: false, message: "DB error" });
-    res.json(results);
-  });
+  // Get driver's name
+  db.query(
+    "SELECT firstname, lastname FROM users WHERE user_id = ? LIMIT 1",
+    [user_id],
+    (err, users) => {
+      if (err || users.length === 0) return res.json([]);
+      const driverName = users[0].firstname + ' ' + users[0].lastname;
+      // Fetch completed reservations for this driver
+      const sql = `
+        SELECT 
+          vr.reservation_ref,
+          vr.trip_date,
+          vr.pickup_location,
+          vr.dropoff_location,
+          vr.status,
+          v.vehicle_plate,
+          v.car_brand,
+          v.model,
+          ca.driver_earnings
+        FROM vehicle_reservations_history vr
+        JOIN vehicles v ON vr.vehicle_registration_id = v.registration_id
+        LEFT JOIN cost_analysis ca ON ca.reservation_ref = vr.reservation_ref
+        WHERE vr.assigned_driver = ?
+          AND vr.status = 'Completed'
+        ORDER BY vr.pickup_datetime DESC
+      `;
+      db.query(sql, [driverName], (err2, results) => {
+        if (err2) return res.json({ success: false, message: "DB error" });
+        res.json(results);
+      });
+    }
+  );
 });
-
 
 // GET total earnings for the logged-in user
 app.get("/user/:user_id/total-earnings", (req, res) => {
