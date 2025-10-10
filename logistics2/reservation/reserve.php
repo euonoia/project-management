@@ -28,7 +28,7 @@ $vehicles_grouped = get_vehicles_grouped($dbh, $user_id);
 
 // Fetch reservations
 $active_reservations = get_user_reservations($dbh, $user_id, ['Pending', 'Dispatched']); // Active reservations
-$travel_history = get_user_reservations($dbh, $user_id, ['Completed', 'Cancelled']);      // Completed or cancelled
+$travel_history = get_user_reservations_history($dbh, $user_id, ['Completed', 'Cancelled']);      // Completed or cancelled
 
 // If you need a single active reservation (for checking form restrictions)
 $active_reservation = $active_reservations[0] ?? null;
