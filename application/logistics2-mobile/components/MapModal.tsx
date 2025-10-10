@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, Text, TouchableOpacity } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Dimensions } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import Constants from 'expo-constants';
 
@@ -27,7 +27,6 @@ export default function MapModal({
   const [coords, setCoords] = useState<{ latitude: number; longitude: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
   const orsApiKey = Constants.expoConfig?.extra?.orsApiKey;
 
   useEffect(() => {
@@ -39,10 +38,9 @@ export default function MapModal({
         setError('');
 
         const url = 'https://api.openrouteservice.org/v2/directions/driving-car';
-
         const body = {
           coordinates: [
-            [pickupLng, pickupLat], // ORS requires [lon, lat]
+            [pickupLng, pickupLat],
             [dropoffLng, dropoffLat],
           ],
         };
@@ -64,7 +62,6 @@ export default function MapModal({
           return;
         }
 
-        // ORS GeoJSON polyline
         const geometry = data.routes[0].geometry;
         const decoded = decodePolyline(geometry);
 
@@ -92,9 +89,7 @@ export default function MapModal({
     const factor = Math.pow(10, precision);
 
     while (index < encoded.length) {
-      let b,
-        shift = 0,
-        result = 0;
+      let b, shift = 0, result = 0;
       do {
         b = encoded.charCodeAt(index++) - 63;
         result |= (b & 0x1f) << shift;
@@ -121,35 +116,138 @@ export default function MapModal({
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View style={{ flex: 1 }}>
-        <TouchableOpacity onPress={onClose} style={{ alignSelf: 'flex-end', margin: 10 }}>
-          <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Close</Text>
-        </TouchableOpacity>
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Trip Route</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <Text style={styles.closeText}>✕</Text>
+          </TouchableOpacity>
+        </View>
 
-        {error ? (
-          <Text style={{ textAlign: 'center', marginTop: 20, color: 'red' }}>{error}</Text>
-        ) : loading ? (
-          <Text style={{ textAlign: 'center', marginTop: 20 }}>Loading route...</Text>
-        ) : (
-          <MapView
-            style={{ flex: 1 }}
-            initialRegion={{
-              latitude: coords[0]?.latitude || 14.5995,
-              longitude: coords[0]?.longitude || 120.9842,
-              latitudeDelta: 0.05,
-              longitudeDelta: 0.05,
-            }}
-          >
-            {coords.length > 0 && (
-              <>
-                <Marker coordinate={coords[0]} title={`Pickup: ${pickup}`} />
-                <Marker coordinate={coords[coords.length - 1]} title={`Dropoff: ${dropoff}`} />
-                <Polyline coordinates={coords} strokeColor="#00f" strokeWidth={4} />
-              </>
-            )}
-          </MapView>
-        )}
+        {/* Info Card */}
+        <View style={styles.infoCard}>
+          <Text style={styles.label}>Pickup:</Text>
+          <Text style={styles.value}>{pickup}</Text>
+
+          <Text style={[styles.label, { marginTop: 8 }]}>Dropoff:</Text>
+          <Text style={styles.value}>{dropoff}</Text>
+        </View>
+
+        {/* Map or Loading/Error */}
+        <View style={styles.mapContainer}>
+          {error ? (
+            <Text style={styles.errorText}>{error}</Text>
+          ) : loading ? (
+            <View style={styles.loadingBox}>
+              <ActivityIndicator size="large" color="#4F46E5" />
+              <Text style={styles.loadingText}>Fetching best route...</Text>
+            </View>
+          ) : (
+            <MapView
+              style={styles.map}
+              initialRegion={{
+                latitude: coords[0]?.latitude || 14.5995,
+                longitude: coords[0]?.longitude || 120.9842,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+              }}
+            >
+              {coords.length > 0 && (
+                <>
+                  <Marker coordinate={coords[0]} title={`Pickup: ${pickup}`} pinColor="#16A34A" />
+                  <Marker coordinate={coords[coords.length - 1]} title={`Dropoff: ${dropoff}`} pinColor="#DC2626" />
+                  <Polyline coordinates={coords} strokeColor="#4F46E5" strokeWidth={4} />
+                </>
+              )}
+            </MapView>
+          )}
+        </View>
       </View>
     </Modal>
   );
 }
+
+const { height } = Dimensions.get('window');
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#F9FAFB',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+    elevation: 3,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  closeBtn: {
+    backgroundColor: '#EEF2FF',
+    borderRadius: 50,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  closeText: {
+    fontSize: 18,
+    color: '#4F46E5',
+    fontWeight: 'bold',
+  },
+  infoCard: {
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderRadius: 12,
+    padding: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  value: {
+    fontSize: 14,
+    color: '#111827',
+  },
+  mapContainer: {
+    flex: 1,
+    marginTop: 12,
+    marginHorizontal: 8,
+    borderRadius: 12,
+    overflow: 'hidden',
+    height: height * 0.7,
+  },
+  map: {
+    flex: 1,
+  },
+  loadingBox: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 14,
+    color: '#4B5563',
+  },
+  errorText: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: '#DC2626',
+    fontWeight: '600',
+  },
+});
