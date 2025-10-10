@@ -1,89 +1,53 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from 'react';
 import {
+  ScrollView,
   View,
   Text,
   TouchableOpacity,
-  ScrollView,
   StyleSheet,
   Dimensions,
-} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import Constants from "expo-constants";
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '@/constants/Colors';
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 const API_URL = Constants.expoConfig?.extra?.API_URL;
 
-if (!API_URL) {
-  throw new Error(
-    "API_URL not defined. Please set API_BASE_URL in your .env and rebuild the app."
-  );
-}
-// Types
 interface Driver {
+  user_id?: number;
   firstname?: string;
   lastname?: string;
-  user_id?: number;
-}
-
-interface EarningsResponse {
-  success: boolean;
-  total_earnings?: string;
-  message?: string;
-}
-
-interface AssignedRidesResponse {
-  success: boolean;
-  assigned_count?: number;
-  message?: string;
 }
 
 export default function DriverHome() {
+  const router = useRouter();
   const [driver, setDriver] = useState<Driver>({});
   const [earnings, setEarnings] = useState<number | null>(null);
   const [assignedRides, setAssignedRides] = useState<number | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
-  // Load driver from AsyncStorage
   useEffect(() => {
     const loadDriver = async () => {
-      try {
-        const storedDriver = await AsyncStorage.getItem("driver");
-        if (storedDriver) {
-          const parsed: Driver = JSON.parse(storedDriver);
-          setDriver({
-            firstname: parsed.firstname || "",
-            lastname: parsed.lastname || "",
-            user_id: parsed.user_id,
-          });
-        } else {
-          router.replace("/");
-        }
-      } catch (error) {
-        console.error("Error loading driver:", error);
-      }
+      const storedDriver = await AsyncStorage.getItem('driver');
+      if (!storedDriver) return router.replace('/');
+      setDriver(JSON.parse(storedDriver));
     };
     loadDriver();
   }, []);
 
-  // Fetch earnings
   useEffect(() => {
     const fetchEarnings = async () => {
       if (!driver.user_id) return;
-
+      setLoading(true);
       try {
-        setLoading(true);
-        const response = await fetch(`${API_URL}/user/${driver.user_id}/total-earnings`);
-        const data: EarningsResponse = await response.json();
-        if (data.success && data.total_earnings) {
-          setEarnings(parseFloat(data.total_earnings));
-        } else {
-          console.warn("Could not fetch earnings:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching earnings:", error);
+        const res = await fetch(`${API_URL}/user/${driver.user_id}/total-earnings`);
+        const data = await res.json();
+        setEarnings(data.total_earnings ? parseFloat(data.total_earnings) : null);
+      } catch {
+        setEarnings(null);
       } finally {
         setLoading(false);
       }
@@ -91,74 +55,53 @@ export default function DriverHome() {
     fetchEarnings();
   }, [driver.user_id]);
 
-  // Fetch assigned rides including current driver
   useEffect(() => {
-    const fetchAssignedRides = async () => {
+    const fetchAssigned = async () => {
       if (!driver.user_id) return;
-
       try {
-        const response = await fetch(`${API_URL}/user/${driver.user_id}/assigned-count`);
-        const data: AssignedRidesResponse = await response.json();
-        if (data.success && typeof data.assigned_count === "number") {
-          setAssignedRides(data.assigned_count); // now includes logged-in driver
-        } else {
-          console.warn("Could not fetch assigned rides:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching assigned rides:", error);
+        const res = await fetch(`${API_URL}/user/${driver.user_id}/assigned-count`);
+        const data = await res.json();
+        setAssignedRides(data.assigned_count ?? 0);
+      } catch {
+        setAssignedRides(null);
       }
     };
-    fetchAssignedRides();
+    fetchAssigned();
   }, [driver.user_id]);
 
-  // Logout
   const handleLogout = async () => {
-    try {
-      await AsyncStorage.clear();
-      router.replace("/");
-    } catch (error) {
-      console.error("Logout Error:", error);
-    }
+    await AsyncStorage.clear();
+    router.replace('/');
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.greeting}>
-        {driver.firstname && driver.lastname
-          ? `Welcome, Driver ${driver.firstname} ${driver.lastname}!`
-          : "Welcome, Driver!"}
+    <ScrollView contentContainerStyle={[styles.container, { backgroundColor: Colors.light.background }]} showsVerticalScrollIndicator={false}>
+      <Text style={[styles.greeting, { color: Colors.light.text }]}>
+        Welcome, Driver {driver.firstname ?? ''} {driver.lastname ?? ''}!
       </Text>
-      <Text style={styles.subtext}>Here’s your current overview</Text>
+      <Text style={[styles.subtext, { color: Colors.light.subtext }]}>
+        Here’s your current overview
+      </Text>
 
       <View style={styles.grid}>
-        {[
-          {
-            icon: "car-outline",
-            title: "Assigned Rides",
-            subtitle:
-              assignedRides !== null
-                ? `${assignedRides} ride${assignedRides !== 1 ? "s" : ""} assigned`
-                : "Loading...",
-          },
-          {
-            icon: "wallet-outline",
-            title: "Earnings",
-            subtitle: loading
-              ? "Loading..."
-              : earnings !== null
-              ? `₱${earnings.toFixed(2)} total`
-              : "No earnings yet",
-          },
-        ].map((item, index) => (
-          <TouchableOpacity key={index} style={styles.card} activeOpacity={0.8}>
-            <Ionicons name={item.icon as any} size={width * 0.08} color="#9a3412" />
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <Text style={styles.cardSubtitle}>{item.subtitle}</Text>
-          </TouchableOpacity>
-        ))}
+        <View style={styles.card}>
+          <Ionicons name="car-outline" size={width * 0.08} color={Colors.light.primary} />
+          <Text style={styles.cardTitle}>Assigned Rides</Text>
+          <Text style={styles.cardSubtitle}>
+            {assignedRides !== null ? `${assignedRides} ride${assignedRides !== 1 ? 's' : ''}` : 'Loading...'}
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <Ionicons name="wallet-outline" size={width * 0.08} color={Colors.light.primary} />
+          <Text style={styles.cardTitle}>Earnings</Text>
+          <Text style={styles.cardSubtitle}>
+            {loading ? 'Loading...' : earnings !== null ? `₱${earnings.toFixed(2)}` : 'No earnings yet'}
+          </Text>
+        </View>
       </View>
 
-      <TouchableOpacity onPress={handleLogout} style={styles.logoutButton} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -166,65 +109,33 @@ export default function DriverHome() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    backgroundColor: "#fff",
-    flexGrow: 1,
-  },
-  greeting: {
-    fontSize: width * 0.055,
-    fontWeight: "700",
-    color: "#1f2937",
-  },
-  subtext: {
-    fontSize: width * 0.035,
-    color: "#374151",
-    marginTop: 4,
-    marginBottom: 20,
-  },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-  },
+  container: { paddingVertical: 40, paddingHorizontal: 20, flexGrow: 1 },
+  greeting: { fontSize: width * 0.055, fontWeight: '700', marginBottom: 4 },
+  subtext: { fontSize: width * 0.035, marginBottom: 20 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   card: {
-    backgroundColor: "#ffffff",
-    width: width < 400 ? "48%" : "47%",
+    backgroundColor: '#fff',
+    width: width < 400 ? '48%' : '47%',
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
-    shadowColor: "#000",
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    shadowColor: '#000',
     shadowOpacity: 0.08,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 3,
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
+    alignItems: 'center',
   },
-  cardTitle: {
-    fontSize: width * 0.04,
-    fontWeight: "600",
-    color: "#1f2937",
-    marginTop: 8,
-  },
-  cardSubtitle: {
-    fontSize: width * 0.032,
-    color: "#4b5563",
-    marginTop: 2,
-  },
+  cardTitle: { fontSize: width * 0.04, fontWeight: '600', marginTop: 8 },
+  cardSubtitle: { fontSize: width * 0.032, marginTop: 2 },
   logoutButton: {
-    backgroundColor: "#9a3412",
+    backgroundColor: Colors.light.primary,
     paddingVertical: 14,
     borderRadius: 10,
-    marginTop: 10,
     borderWidth: 1,
-    borderColor: "#7c2d12",
+    borderColor: Colors.light.secondary,
   },
-  logoutText: {
-    color: "#ffffff",
-    textAlign: "center",
-    fontWeight: "600",
-    fontSize: width * 0.04,
-  },
+  logoutText: { color: '#fff', textAlign: 'center', fontWeight: '600', fontSize: width * 0.04 },
 });
