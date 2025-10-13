@@ -68,7 +68,7 @@ $WSQL = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
 // Total distinct reservations (for pagination)
 $totalRows = 0;
 try {
-    $sqlCount = 'SELECT COUNT(DISTINCT vr.reservation_ref) FROM vehicle_reservations vr
+    $sqlCount = 'SELECT COUNT(DISTINCT vr.reservation_ref) FROM vehicle_reservations_history vr
         JOIN vehicles v ON v.registration_id = vr.vehicle_registration_id
         LEFT JOIN users uo ON uo.user_id = v.user_id
         LEFT JOIN cost_analysis ca ON ca.reservation_ref = vr.reservation_ref
@@ -102,7 +102,7 @@ $qBase = 'SELECT
     COALESCE(uo.firstname, "") AS owner_firstname,
     COALESCE(uo.lastname,  "") AS owner_lastname,
     COALESCE(SUM(ca.driver_earnings), 0) AS total_driver_earnings
-FROM vehicle_reservations vr
+FROM vehicle_reservations_history vr
 JOIN vehicles v ON v.registration_id = vr.vehicle_registration_id
 LEFT JOIN users uo ON uo.user_id = v.user_id -- owner of the vehicle
 LEFT JOIN cost_analysis ca ON ca.reservation_ref = vr.reservation_ref

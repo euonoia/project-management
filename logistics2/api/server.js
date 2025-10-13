@@ -242,46 +242,82 @@ app.get("/user/:user_id/assigned-count", (req, res) => {
   });
 });
 
-// Update reservation status
-app.put("/update-reservation-status/:reservation_ref", (req, res) => {
+app.put("/complete-reservation/:reservation_ref", (req, res) => {
   const { reservation_ref } = req.params;
-  const { status } = req.body;
+  const { arrival_time, odometer_end, notes } = req.body;
 
-  // Validate input
-  if (!status) {
-    return res.status(400).json({ success: false, message: "Status is required" });
+  if (!arrival_time || !odometer_end || odometer_end <= 0) {
+    return res.status(400).json({ success: false, message: "Arrival time and valid odometer end are required" });
   }
 
-  // Optional: validate allowed status values
-  const allowedStatuses = ["pending", "ongoing", "completed", "cancelled"];
-  if (!allowedStatuses.includes(status.toLowerCase())) {
-    return res
-      .status(400)
-      .json({ success: false, message: `Invalid status. Allowed: ${allowedStatuses.join(", ")}` });
-  }
+  // Fetch the reservation
+  db.query("SELECT * FROM vehicle_reservations WHERE reservation_ref = ?", [reservation_ref], (err, results) => {
+    if (err) return res.status(500).json({ success: false, message: "Database error" });
+    if (results.length === 0) return res.status(404).json({ success: false, message: "Reservation not found" });
 
-  const sql = `
-    UPDATE vehicle_reservations
-    SET status = ?
-    WHERE reservation_ref = ?
-  `;
+    const reservation = results[0];
 
-  db.query(sql, [status, reservation_ref], (err, result) => {
-    if (err) {
-      console.error("DB Error (update reservation):", err);
-      return res.status(500).json({ success: false, message: "Database error" });
+    if (reservation.status !== "Dispatched") {
+      return res.status(400).json({ success: false, message: "Only dispatched reservations can be completed" });
     }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ success: false, message: "Reservation not found" });
+    if (reservation.odometer_start !== null && reservation.odometer_start > odometer_end) {
+      return res.status(400).json({ success: false, message: "Odometer end cannot be less than start" });
     }
 
-    res.json({
-      success: true,
-      message: `Reservation ${reservation_ref} status updated to ${status}`,
+    // Start transaction
+    db.beginTransaction((err) => {
+      if (err) return res.status(500).json({ success: false, message: "Transaction error" });
+
+      // Insert into history
+      const historySql = `
+        INSERT INTO vehicle_reservations_history
+        (id, user_id, reservation_ref, vehicle_registration_id, vehicle_plate, passengers_count, trip_date, pickup_datetime, dropoff_datetime, pickup_location, dropoff_location, status, assigned_driver, driver_contact, dispatch_time, arrival_time, odometer_start, odometer_end, requester_name, purpose, notes, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Completed', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      const historyParams = [
+        reservation.id,
+        reservation.user_id,
+        reservation.reservation_ref,
+        reservation.vehicle_registration_id,
+        reservation.vehicle_plate,
+        reservation.passengers_count,
+        reservation.trip_date,
+        reservation.pickup_datetime,
+        reservation.dropoff_datetime,
+        reservation.pickup_location,
+        reservation.dropoff_location,
+        reservation.assigned_driver,
+        reservation.driver_contact,
+        reservation.dispatch_time,
+        arrival_time,
+        reservation.odometer_start,
+        odometer_end,
+        reservation.requester_name,
+        reservation.purpose,
+        notes ?? null,
+        reservation.created_at,
+      ];
+
+      db.query(historySql, historyParams, (err) => {
+        if (err) return db.rollback(() => res.status(500).json({ success: false, message: "Insert history failed" }));
+
+        // Delete from active reservations
+        db.query("DELETE FROM vehicle_reservations WHERE reservation_ref = ?", [reservation_ref], (err) => {
+          if (err) return db.rollback(() => res.status(500).json({ success: false, message: "Delete active failed" }));
+
+          db.commit((err) => {
+            if (err) return db.rollback(() => res.status(500).json({ success: false, message: "Commit failed" }));
+
+            res.json({ success: true, message: "Reservation completed and archived successfully" });
+          });
+        });
+      });
     });
   });
 });
+
+
 
 const PORT = 5000;
 const HOST = '0.0.0.0'; // Listen on all network interfaces

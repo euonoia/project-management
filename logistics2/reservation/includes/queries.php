@@ -144,5 +144,12 @@ function get_available_vehicles(PDO $dbh, $user_id) {
 }
 
 $availableVehicles = get_available_vehicles($dbh, $_SESSION['user_id']);
+
+// Cancel a reservation (sets status to 'Cancelled')
+function cancel_reservation(PDO $dbh, int $reservation_id) {
+    $stmt = $dbh->prepare("UPDATE vehicle_reservations SET status = 'Cancelled' WHERE id = :id");
+    return $stmt->execute([':id' => $reservation_id]);
+}
+
 ?>
 

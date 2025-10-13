@@ -115,31 +115,35 @@ export default function AssignedUser({ navigation }: any) {
     return () => clearInterval(interval);
   }, []);
 
-  // --- Complete reservation handler ---
-  const handleCompleteReservation = async (reservationRef: string) => {
-    try {
-      const response = await fetch(`${API_URL}/update-reservation-status/${reservationRef}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "completed" }),
-      });
+    const handleCompleteReservation = async (reservationRef: string) => {
+      try {
+        const response = await fetch(`${API_URL}/complete-reservation/${reservationRef}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            arrival_time: new Date().toISOString(), // required
+            odometer_end: 12345, // required (replace with actual end reading)
+            notes: "Trip completed via app", // optional
+          }),
+        });
 
-      const data: { success: boolean; message?: string } = await response.json();
+        const data = await response.json();
 
-      if (data.success) {
-        setCustomers((prev) =>
-          prev.map((item) =>
-            item.reservation_ref === reservationRef ? { ...item, status: "completed" } : item
-          )
-        );
-      } else {
-        alert(data.message || "Failed to update status");
+        if (data.success) {
+          setCustomers((prev) =>
+            prev.map((item) =>
+              item.reservation_ref === reservationRef ? { ...item, status: "completed" } : item
+            )
+          );
+          alert("Reservation completed successfully");
+        } else {
+          alert(data.message || "Failed to update status");
+        }
+      } catch (err) {
+        console.error("Failed to update reservation status:", err);
+        alert("Error updating reservation status");
       }
-    } catch (err) {
-      console.error("Failed to update reservation status:", err);
-      alert("Error updating reservation status");
-    }
-  };
+    };
 
   const openTravelHistory = async () => {
     setModalVisible(true);
@@ -275,16 +279,14 @@ export default function AssignedUser({ navigation }: any) {
                 <Text style={styles.mapButtonText}>Show Direction</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity
-                style={styles.completeButton}
-                onPress={() => handleCompleteReservation(item.reservation_ref)}
-                disabled={item.status.toLowerCase() === "completed"}
-              >
-                <Ionicons name="checkmark-done-outline" size={scaleFont(18)} color="#fff" />
-                <Text style={styles.completeButtonText}>
-                  {item.status.toLowerCase() === "completed" ? "Completed" : "Complete"}
-                </Text>
-              </TouchableOpacity>
+             <TouchableOpacity
+              style={styles.completeButton}
+              onPress={() => handleCompleteReservation(item.reservation_ref)}
+            >
+              <Ionicons name="checkmark-done-outline" size={scaleFont(18)} color="#fff" />
+              <Text style={styles.completeButtonText}>Complete</Text>
+            </TouchableOpacity>
+
             </View>
           )}
         />
