@@ -279,14 +279,6 @@ export default function AssignedUser({ navigation }: any) {
                 <Text style={styles.mapButtonText}>Show Direction</Text>
               </TouchableOpacity>
 
-             <TouchableOpacity
-              style={styles.completeButton}
-              onPress={() => handleCompleteReservation(item.reservation_ref)}
-            >
-              <Ionicons name="checkmark-done-outline" size={scaleFont(18)} color="#fff" />
-              <Text style={styles.completeButtonText}>Complete</Text>
-            </TouchableOpacity>
-
             </View>
           )}
         />

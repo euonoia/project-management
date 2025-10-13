@@ -70,41 +70,55 @@
 
           <!--this is the reservation card-->
         <div 
-            class="trip-card relative bg-white border border-gray-200 p-6 
-                    shadow-md hover:shadow-xl transition transform hover:-translate-y-1 mb-6"
-            style="border-radius: 1.25rem; box-shadow: 0 4px 10px rgba(0,0,0,0.08);"
-            data-date="<?= $tripDate ?>"
-            data-text="<?= strtolower($res['reservation_ref'].' '.$res['pickup_location'].' '.$res['dropoff_location']) ?>"
-            >
-            <!-- Status Badge -->
-            <span class="absolute top-4 right-4 inline-flex items-center px-3 py-1 
-                        rounded-full text-xs font-medium tracking-wide <?= $badgeColor ?>">
-                <i class="<?= $statusIcon ?> mr-1"></i>
-                <?= ucfirst($res['status']) ?>
-            </span>
+          class="trip-card relative bg-white border border-gray-200 p-6 
+                  shadow-md hover:shadow-xl transition transform hover:-translate-y-1 mb-6"
+          style="border-radius: 1.25rem; box-shadow: 0 4px 10px rgba(0,0,0,0.08);"
+          data-date="<?= $tripDate ?>"
+          data-text="<?= strtolower($res['reservation_ref'].' '.$res['pickup_location'].' '.$res['dropoff_location']) ?>"
+      >
+          <!-- Status Badge -->
+          <span class="absolute top-4 right-4 inline-flex items-center px-3 py-1 
+                      rounded-full text-xs font-medium tracking-wide <?= $badgeColor ?>">
+              <i class="<?= $statusIcon ?> mr-1"></i>
+              <?= ucfirst($res['status']) ?>
+          </span>
 
-            <!-- Reservation Info -->
-            <div class="mb-4">
-                <p class="font-semibold text-lg text-gray-900"><?= e($res['reservation_ref']) ?></p>
-                <p class="text-gray-500 text-sm"><?= e(date('M d, Y', strtotime($res['trip_date']))) ?></p>
-            </div>
+          <!-- Reservation Info -->
+          <div class="mb-4">
+              <p class="font-semibold text-lg text-gray-900"><?= e($res['reservation_ref']) ?></p>
+              <p class="text-gray-500 text-sm"><?= e(date('M d, Y', strtotime($res['trip_date']))) ?></p>
+          </div>
 
-            <!-- Trip Details -->
-            <div class="space-y-3">
-                <div class="flex items-center space-x-3">
-                    <i class="fas fa-map-marker-alt text-red-500 w-5 text-center"></i>
-                    <span class="text-sm"><strong>Pick-up:</strong> <?= e($res['pickup_location']) ?></span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <i class="fas fa-flag-checkered text-green-500 w-5 text-center"></i>
-                    <span class="text-sm"><strong>Drop-off:</strong> <?= e($res['dropoff_location']) ?></span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <i class="fas fa-clock text-gray-400 w-5 text-center"></i>
-                    <span class="text-sm"><strong>Time:</strong> <?= e(date('H:i', strtotime($res['pickup_datetime']))) ?> - <?= e(date('H:i', strtotime($res['dropoff_datetime']))) ?></span>
-                </div>
-            </div>
-            </div>
+          <!-- Trip Details -->
+          <div class="space-y-3">
+              <div class="flex items-center space-x-3">
+                  <i class="fas fa-map-marker-alt text-red-500 w-5 text-center"></i>
+                  <span class="text-sm"><strong>Pick-up:</strong> <?= e($res['pickup_location']) ?></span>
+              </div>
+              <div class="flex items-center space-x-3">
+                  <i class="fas fa-flag-checkered text-green-500 w-5 text-center"></i>
+                  <span class="text-sm"><strong>Drop-off:</strong> <?= e($res['dropoff_location']) ?></span>
+              </div>
+              <div class="flex items-center space-x-3">
+                  <i class="fas fa-clock text-gray-400 w-5 text-center"></i>
+                  <span class="text-sm"><strong>Time:</strong> <?= e(date('H:i', strtotime($res['pickup_datetime']))) ?> - <?= e(date('H:i', strtotime($res['dropoff_datetime']))) ?></span>
+              </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="mt-4 flex gap-2 justify-end">
+              <?php if ($res['status'] === 'Completed'): ?>
+                  <button 
+                      type="button"
+                      class="px-4 py-2 bg-green-500 text-black rounded-lg shadow hover:bg-yellow-600 transition w-auto max-w-[200px]"
+                      onclick="openRateDriverModal(<?= (int)$res['id'] ?>)"
+                  >
+                      Rate Driver
+                  </button>
+              <?php endif; ?>
+          </div>
+      </div>
+
 
         <?php endforeach; ?>
       <?php endif; ?>
@@ -112,8 +126,32 @@
   </div>
 </div>
 
+
+<!-- Rate Driver Modal -->
+<div id="rateDriverModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden" style="z-index:9999;">
+    <div class="bg-white rounded-lg p-6 w-96 relative shadow-2xl">
+        <h2 class="text-xl font-semibold mb-4">Rate Driver</h2>
+        <!-- 5 Star Rating -->
+        <div id="starRating" class="flex space-x-2 text-2xl cursor-pointer">
+            <span data-value="1">&#9733;</span>
+            <span data-value="2">&#9733;</span>
+            <span data-value="3">&#9733;</span>
+            <span data-value="4">&#9733;</span>
+            <span data-value="5">&#9733;</span>
+        </div>
+        <textarea id="ratingNotes" placeholder="Optional feedback..." class="w-full mt-4 border p-2 rounded"></textarea>
+        <div class="mt-4 flex justify-end gap-2">
+            <button onclick="submitRating()" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">Submit</button>
+            <button onclick="closeRateDriverModal()" class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400">Cancel</button>
+        </div>
+    </div>
+</div>
+
+
 <!-- Filtering Script -->
 <script>
+let selectedReservationId = null;
+let selectedRating = 0;
 let customRangePicker;
 let selectedRange = null;
 
@@ -199,4 +237,56 @@ document.getElementById("clearFilters").addEventListener("click", () => {
   selectedRange = null;
   filterTrips();
 });
+function openRateDriverModal(reservationId) {
+    selectedReservationId = reservationId;
+    selectedRating = 0;
+    const modal = document.getElementById('rateDriverModal');
+    modal.classList.remove('hidden');
+    modal.style.zIndex = 9999; // ensure it's on top
+    updateStars(0);
+}
+
+function closeRateDriverModal() {
+    document.getElementById('rateDriverModal').classList.add('hidden');
+}
+
+
+const stars = document.querySelectorAll('#starRating span');
+stars.forEach(star => {
+    star.addEventListener('mouseover', () => updateStars(star.dataset.value));
+    star.addEventListener('click', () => selectedRating = star.dataset.value);
+});
+
+function updateStars(rating) {
+    stars.forEach(star => {
+        star.style.color = star.dataset.value <= rating ? '#fbbf24' : '#d1d5db'; // yellow or gray
+    });
+}
+
+function submitRating() {
+    const notes = document.getElementById('ratingNotes').value;
+    if (!selectedRating) {
+        alert('Please select a star rating.');
+        return;
+    }
+
+    // Example: submit via fetch/AJAX
+    fetch('rate_driver.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            reservation_id: selectedReservationId,
+            rating: selectedRating,
+            notes: notes
+        })
+    }).then(res => res.json())
+      .then(data => {
+          if (data.success) {
+              alert('Driver rated successfully!');
+              closeRateDriverModal();
+          } else {
+              alert(data.message || 'Failed to rate driver.');
+          }
+      });
+}
 </script>
