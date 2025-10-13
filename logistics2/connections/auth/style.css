@@ -498,3 +498,36 @@ input:focus, select:focus {
 @media (min-width: 801px) {
   .layout { grid-template-columns: auto 1fr; }
 }
+
+/* Small card adjustments */
+.small-card {
+  padding: 0.75rem;       /* smaller padding */
+  font-size: 0.85rem;     /* reduce overall font size */
+  border-radius: 0.5rem;  /* rounded corners */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.small-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Smaller stat numbers */
+.k.small {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #16a34a; /* green for Completed Trips, keep color consistent */
+}
+
+/* Smaller label text */
+.label.small-label {
+  font-size: 0.75rem;
+  color: #6b7280; /* gray text */
+  margin-top: 2px;
+}
+
+/* Smaller pill link */
+.pill.small-pill {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+}

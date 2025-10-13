@@ -74,6 +74,7 @@ export default function AssignedUser({ navigation }: any) {
   const [selectedDropoffLat, setSelectedDropoffLat] = useState<number | null>(null);
   const [selectedDropoffLng, setSelectedDropoffLng] = useState<number | null>(null);
 
+  // --- Fetch assigned customers ---
   useEffect(() => {
     const fetchAssignedCustomers = async () => {
       try {
@@ -114,6 +115,32 @@ export default function AssignedUser({ navigation }: any) {
     return () => clearInterval(interval);
   }, []);
 
+  // --- Complete reservation handler ---
+  const handleCompleteReservation = async (reservationRef: string) => {
+    try {
+      const response = await fetch(`${API_URL}/update-reservation-status/${reservationRef}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "completed" }),
+      });
+
+      const data: { success: boolean; message?: string } = await response.json();
+
+      if (data.success) {
+        setCustomers((prev) =>
+          prev.map((item) =>
+            item.reservation_ref === reservationRef ? { ...item, status: "completed" } : item
+          )
+        );
+      } else {
+        alert(data.message || "Failed to update status");
+      }
+    } catch (err) {
+      console.error("Failed to update reservation status:", err);
+      alert("Error updating reservation status");
+    }
+  };
+
   const openTravelHistory = async () => {
     setModalVisible(true);
     setHistoryLoading(true);
@@ -145,7 +172,6 @@ export default function AssignedUser({ navigation }: any) {
       fontSize: scaleFont(12),
       overflow: "hidden",
     };
-
     switch (status.toLowerCase()) {
       case "pending":
         return { ...base, backgroundColor: "#ECC94B" };
@@ -169,6 +195,7 @@ export default function AssignedUser({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Assigned Customers</Text>
         <TouchableOpacity onPress={openTravelHistory} style={styles.historyButton}>
@@ -177,6 +204,7 @@ export default function AssignedUser({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
+      {/* Customers List */}
       {activeCustomers.length === 0 ? (
         <View style={styles.emptyState}>
           <Ionicons name="car-outline" size={scaleFont(60)} color="#A0AEC0" />
@@ -189,6 +217,7 @@ export default function AssignedUser({ navigation }: any) {
           showsVerticalScrollIndicator={false}
           renderItem={({ item }) => (
             <View style={styles.card}>
+              {/* Header */}
               <View style={styles.cardHeader}>
                 <Text style={styles.customerName}>
                   {item.customer_firstname} {item.customer_lastname}
@@ -196,11 +225,11 @@ export default function AssignedUser({ navigation }: any) {
                 <Text style={getStatusBadgeStyle(item.status)}>{item.status.toUpperCase()}</Text>
               </View>
 
+              {/* Locations */}
               <View style={styles.cardRow}>
                 <Ionicons name="location-outline" size={scaleFont(16)} color="#9a3412" />
                 <Text style={styles.locationText}>Pickup: {item.pickup_location}</Text>
               </View>
-
               <View style={styles.cardRow}>
                 <MaterialIcons name="flag" size={scaleFont(16)} color="#7c2d12" />
                 <Text style={styles.locationText}>Dropoff: {item.dropoff_location}</Text>
@@ -210,6 +239,7 @@ export default function AssignedUser({ navigation }: any) {
                 {item.car_brand} {item.model} • {item.vehicle_plate}
               </Text>
 
+              {/* Fare info */}
               {(item.total_fare || item.distance_km || item.estimated_time) && (
                 <View style={styles.fareContainer}>
                   {item.distance_km && (
@@ -228,6 +258,7 @@ export default function AssignedUser({ navigation }: any) {
                 </View>
               )}
 
+              {/* Buttons */}
               <TouchableOpacity
                 style={styles.mapButton}
                 onPress={() => {
@@ -243,11 +274,23 @@ export default function AssignedUser({ navigation }: any) {
                 <Ionicons name="navigate-outline" size={scaleFont(18)} color="#fff" />
                 <Text style={styles.mapButtonText}>Show Direction</Text>
               </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.completeButton}
+                onPress={() => handleCompleteReservation(item.reservation_ref)}
+                disabled={item.status.toLowerCase() === "completed"}
+              >
+                <Ionicons name="checkmark-done-outline" size={scaleFont(18)} color="#fff" />
+                <Text style={styles.completeButtonText}>
+                  {item.status.toLowerCase() === "completed" ? "Completed" : "Complete"}
+                </Text>
+              </TouchableOpacity>
             </View>
           )}
         />
       )}
 
+      {/* Map Modal */}
       <MapModal
         visible={mapVisible}
         onClose={() => setMapVisible(false)}
@@ -259,6 +302,7 @@ export default function AssignedUser({ navigation }: any) {
         dropoffLng={selectedDropoffLng}
       />
 
+      {/* History Modal */}
       <Modal visible={modalVisible} animationType="slide">
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
@@ -267,7 +311,6 @@ export default function AssignedUser({ navigation }: any) {
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Travel History</Text>
           </View>
-
           {historyLoading ? (
             <ActivityIndicator size="large" color="#9a3412" />
           ) : (
@@ -306,6 +349,7 @@ export default function AssignedUser({ navigation }: any) {
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -462,4 +506,21 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 6,
   },
+  completeButton: {
+  flexDirection: "row",
+  backgroundColor: "#48BB78", // green color for completion
+  justifyContent: "center",
+  alignItems: "center",
+  paddingVertical: height * 0.012,
+  borderRadius: 8,
+  marginTop: 10,
+},
+
+completeButtonText: {
+  color: "#fff",
+  marginLeft: 6,
+  fontWeight: "600",
+  fontSize: scaleFont(14),
+},
+
 });

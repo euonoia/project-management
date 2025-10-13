@@ -30,7 +30,6 @@ $admin = $result->fetch_assoc();
 $user_name = trim($admin['firstname'] . ' ' . $admin['lastname']);
 if ($user_name === '') $user_name = 'Admin';
 
-// Optional: set session role explicitly
 $_SESSION['role'] = 'admin';
 
 // HTML escape helper
@@ -43,10 +42,11 @@ try {
     $dbName = '';
 }
 
-// Quick entity counts
+// Safe counter
 function safe_count(PDO $dbh, $table) {
     try { return (int)$dbh->query('SELECT COUNT(*) FROM `'.$table.'`')->fetchColumn(); } catch (Throwable $e) { return 0; }
 }
+
 $cntUsers = safe_count($dbh, 'users');
 $cntVehicles = safe_count($dbh, 'vehicles');
 $cntDocs = safe_count($dbh, 'documents');
@@ -61,6 +61,20 @@ try {
         if (isset($stCounts[$k])) $stCounts[$k] = (int)$r['c'];
     }
 } catch (Throwable $e) {}
+
+// ✅ Analytics: Completed Reservations from History
+$cntCompletedHistory = 0;
+try {
+    $stmt = $dbh->query("SELECT COUNT(*) FROM vehicle_reservations_history WHERE status = 'Completed'");
+    $cntCompletedHistory = (int)$stmt->fetchColumn();
+} catch (Throwable $e) {
+    $cntCompletedHistory = 0;
+}
+
+// ✅ Compute completion rate
+$totalTrips = $cntRes + $cntCompletedHistory;
+$completionRate = $totalTrips > 0 ? round(($cntCompletedHistory / $totalTrips) * 100, 1) : 0;
+
 ?>
 
 <!doctype html>
@@ -69,12 +83,13 @@ try {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin Panel</title>
-   <script src="./config/firebase-config.php"></script>
-    <script type="module" src="./config/firebase.js"></script>
+  <script src="./config/firebase-config.php"></script>
+  <script type="module" src="./config/firebase.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="layout">
@@ -100,94 +115,64 @@ try {
         <a href="components/history.php">Travel Records</a>
         <a href="components/users.php">Users</a>
         <a href="components/drivers.php">Drivers</a>
-         <hr style="border-color:var(--border)">
+        <hr style="border-color:var(--border)">
         <a href="../auth/logout.php">Logout</a>
       </nav>
     </aside>
+
     <div class="content-area" style="display:flex;flex-direction:column;flex:1 1 0%;min-width:0;">
       <header class="topbar">
         <div>
           <div class="muted" style="font-size:14px">Welcome, <?php echo e($user_name); ?></div>
           <div style="font-weight:800; font-size:18px; letter-spacing:.3px">System Overview</div>
         </div>
-       <div class="userbox">
-    <!-- Display the role in uppercase -->
-    <span class="pill"><?php echo strtoupper($_SESSION['role'] ?? 'USER'); ?></span>
-
-    <!-- Display first letter of the name in uppercase -->
-    <div class="avatar"><?php echo strtoupper(substr($user_name ?? 'User', 0, 1)); ?></div>
-</div>
-
+        <div class="userbox">
+          <span class="pill"><?php echo strtoupper($_SESSION['role'] ?? 'USER'); ?></span>
+          <div class="avatar"><?php echo strtoupper(substr($user_name ?? 'User', 0, 1)); ?></div>
+        </div>
       </header>
+
       <main class="content">
-   
-    <section class="grid">
-      <div class="card"><div class="stat"><div><div class="k"><?php echo (int)$cntUsers; ?></div><div class="label">Users</div></div><a class="pill" href="?t=users">View</a></div></div>
-      <div class="card"><div class="stat"><div><div class="k"><?php echo (int)$cntVehicles; ?></div><div class="label">Vehicles</div></div><a class="pill" href="?t=vehicles">View</a></div></div>
-      <div class="card"><div class="stat"><div><div class="k"><?php echo (int)$cntDocs; ?></div><div class="label">Documents</div></div><a class="pill" href="?t=documents">View</a></div></div>
-      <div class="card"><div class="stat"><div><div class="k"><?php echo (int)$cntIns; ?></div><div class="label">Insurance</div></div><a class="pill" href="?t=vehicle_insurance">View</a></div></div>
-      <div class="card"><div class="stat"><div><div class="k"><?php echo (int)array_sum($stCounts); ?></div><div class="label">Reservations</div></div><a class="pill" href="?t=vehicle_reservations">View</a></div></div>
-    </section>
-      
-  </main>
-</div>
-</body>
+        <section class="grid">
+          <div class="card"><div class="stat"><div><div class="k"><?php echo (int)$cntUsers; ?></div><div class="label">Users</div></div><a class="pill" href="?t=users">View</a></div></div>
+          <div class="card"><div class="stat"><div><div class="k"><?php echo (int)$cntVehicles; ?></div><div class="label">Vehicles</div></div><a class="pill" href="?t=vehicles">View</a></div></div>
+          <div class="card"><div class="stat"><div><div class="k"><?php echo (int)$cntDocs; ?></div><div class="label">Documents</div></div><a class="pill" href="?t=documents">View</a></div></div>
+          <div class="card"><div class="stat"><div><div class="k"><?php echo (int)$cntIns; ?></div><div class="label">Insurance</div></div><a class="pill" href="?t=vehicle_insurance">View</a></div></div>
+          <div class="card"><div class="stat"><div><div class="k"><?php echo (int)array_sum($stCounts); ?></div><div class="label">Reservations</div></div><a class="pill" href="?t=vehicle_reservations">View</a></div></div>
+            <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <!-- Completed Trips Analytics -->
+              <div class="card small-card">
+                <div class="stat">
+                  <div>
+                    <div class="k small"><?php echo (int)$cntCompletedHistory; ?></div>
+                    <div class="label small-label">Completed Trips</div>
+                  </div>
+                  <a class="pill small-pill" href="components/history.php">View</a>
+                </div>
+              </div>
+
+              <!-- Completion Rate -->
+              <div class="card small-card">
+                <div class="stat">
+                  <div>
+                    <div class="k small"><?php echo $completionRate; ?>%</div>
+                    <div class="label small-label">Completion Rate</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Optional: Analytics Donut Chart -->
+            <section style="margin-top:2rem;">
+              <canvas id="completionChart" width="250" height="250"></canvas>
+            </section>
+
 <script>
-// Modern dropdown: click, hover, keyboard accessible
-document.addEventListener('DOMContentLoaded', function() {
-  var btn = document.getElementById('dropdownBtn');
-  var dropdown = btn && btn.closest('.modern-dropdown');
-  var content = document.getElementById('dropdownContent');
-  if (btn && dropdown && content) {
-    // Toggle on click
-    btn.addEventListener('click', function(e) {
-      e.preventDefault();
-      var isOpen = dropdown.classList.toggle('open');
-      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-      if (isOpen) {
-        content.querySelector('a')?.focus();
-      }
-    });
-    // Keyboard navigation
-    dropdown.addEventListener('keydown', function(e) {
-      if (!dropdown.classList.contains('open')) return;
-      var links = Array.from(content.querySelectorAll('a'));
-      var idx = links.indexOf(document.activeElement);
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        links[(idx+1)%links.length]?.focus();
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        links[(idx-1+links.length)%links.length]?.focus();
-      } else if (e.key === 'Escape') {
-        dropdown.classList.remove('open');
-        btn.setAttribute('aria-expanded', 'false');
-        btn.focus();
-      }
-    });
-    // Close on outside click
-    document.addEventListener('mousedown', function(e) {
-      if (!dropdown.contains(e.target)) {
-        dropdown.classList.remove('open');
-        btn.setAttribute('aria-expanded', 'false');
-      }
-    });
-    // Open on hover
-    dropdown.addEventListener('mouseenter', function() {
-      dropdown.classList.add('open');
-      btn.setAttribute('aria-expanded', 'true');
-    });
-    dropdown.addEventListener('mouseleave', function() {
-      dropdown.classList.remove('open');
-      btn.setAttribute('aria-expanded', 'false');
-    });
-  }
-});
+// Sidebar toggle
 document.addEventListener('DOMContentLoaded', function() {
   var sidebar = document.getElementById('sidebar');
   var toggle = document.getElementById('sidebarToggle');
   var icon = document.getElementById('sidebarToggleIcon');
-  // Restore state
   if (localStorage.getItem('sidebar-collapsed') === '1') {
     sidebar.classList.add('collapsed');
     icon.style.transform = 'rotate(180deg)';
@@ -202,6 +187,29 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+// ✅ Donut chart for Completed vs Others
+const ctx = document.getElementById('completionChart');
+if (ctx) {
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Completed', 'Others'],
+      datasets: [{
+        data: [<?php echo $cntCompletedHistory; ?>, <?php echo max($totalTrips - $cntCompletedHistory, 0); ?>],
+        backgroundColor: ['#4CAF50', '#E0E0E0']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' },
+        title: { display: true, text: 'Trip Completion Analytics' }
+      }
+    }
+  });
+}
 </script>
 
+</body>
 </html>

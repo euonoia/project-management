@@ -18,7 +18,7 @@ const db = mysql.createConnection({
 
 db.connect(err => {
   if (err) throw err;
-  console.log("✅ MySQL Connected...");
+  console.log(" MySQL Connected...");
 });
 
 app.post("/login", (req, res) => {
@@ -138,7 +138,7 @@ app.get("/assigned-customers/:user_id", (req, res) => {
     });
   });
 });
-
+[]
 
 
 app.get("/travel-history/:user_id", (req, res) => {
@@ -242,6 +242,46 @@ app.get("/user/:user_id/assigned-count", (req, res) => {
   });
 });
 
+// Update reservation status
+app.put("/update-reservation-status/:reservation_ref", (req, res) => {
+  const { reservation_ref } = req.params;
+  const { status } = req.body;
+
+  // Validate input
+  if (!status) {
+    return res.status(400).json({ success: false, message: "Status is required" });
+  }
+
+  // Optional: validate allowed status values
+  const allowedStatuses = ["pending", "ongoing", "completed", "cancelled"];
+  if (!allowedStatuses.includes(status.toLowerCase())) {
+    return res
+      .status(400)
+      .json({ success: false, message: `Invalid status. Allowed: ${allowedStatuses.join(", ")}` });
+  }
+
+  const sql = `
+    UPDATE vehicle_reservations
+    SET status = ?
+    WHERE reservation_ref = ?
+  `;
+
+  db.query(sql, [status, reservation_ref], (err, result) => {
+    if (err) {
+      console.error("DB Error (update reservation):", err);
+      return res.status(500).json({ success: false, message: "Database error" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "Reservation not found" });
+    }
+
+    res.json({
+      success: true,
+      message: `Reservation ${reservation_ref} status updated to ${status}`,
+    });
+  });
+});
 
 const PORT = 5000;
 const HOST = '0.0.0.0'; // Listen on all network interfaces
