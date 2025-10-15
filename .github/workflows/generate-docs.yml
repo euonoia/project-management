@@ -1,12 +1,12 @@
 name: Generate PHP Documentation
 
 permissions:
-  contents: write  # ✅ Allow the workflow to push changes
+  contents: write  # ✅ Allows pushing new docs
 
 on:
   push:
     branches:
-      - main  # triggers every time you push to main branch
+      - main  # ✅ Runs when you push to main
 
 jobs:
   build-docs:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          persist-credentials: false  
+          persist-credentials: false
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -27,9 +27,9 @@ jobs:
         run: curl -L -o phpDocumentor.phar https://github.com/phpDocumentor/phpDocumentor/releases/latest/download/phpDocumentor.phar
 
       - name: Generate PHP Documentation
-        run: php phpDocumentor.phar --directory logistics2 --target docs/logistics2-php
+        run: php phpDocumentor.phar --directory logistics2 --target docs
 
-      - name: Commit documentation
+      - name: Commit and Push Documentation
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -37,5 +37,5 @@ jobs:
           git config user.email "actions@github.com"
           git add docs/
           git commit -m "Update PHP docs [skip ci]" || echo "No changes to commit"
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/eunoia/project-management.git
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
           git push origin main
