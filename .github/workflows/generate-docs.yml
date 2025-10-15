@@ -1,0 +1,33 @@
+name: Generate PHP Documentation
+
+on:
+  push:
+    branches:
+      - main  # triggers every time you push to main branch
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Download phpDocumentor
+        run: curl -L -o phpDocumentor.phar https://github.com/phpDocumentor/phpDocumentor/releases/latest/download/phpDocumentor.phar
+
+      - name: Generate PHP Documentation
+        run: php phpDocumentor.phar --directory logistics2 --target docs/logistics2-php
+
+      - name: Commit documentation
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add docs/
+          git commit -m "Update PHP docs [skip ci]" || echo "No changes to commit"
+          git push
