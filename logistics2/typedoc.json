@@ -1,0 +1,18 @@
+{
+  "entryPoints": [
+    "api",
+    "connections",
+    "dispatchsystem",
+    "drivertripperformancemonitoring",
+    "fleetvehiclemanagement",
+    "reservation",
+    "transportcostanalysis"
+  ],
+  "entryPointStrategy": "expand",
+  "out": "../docs/logistics2",
+  "plugin": ["typedoc-plugin-markdown"],
+  "includeVersion": true,
+  "hideGenerator": true,
+  "exclude": ["**/node_modules/**", "**/dist/**", "**/build/**"],
+  "js": true
+}

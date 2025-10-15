@@ -1,0 +1,20 @@
+{
+  "source": {
+    "include": [
+      "logistics2/api",
+      "logistics2/connections",
+      "logistics2/dispatchsystem",
+      "logistics2/drivertripperformancemonitoring",
+      "logistics2/fleetvehiclemanagement",
+      "logistics2/reservation",
+      "logistics2/transportcostanalysis"
+    ],
+    "includePattern": ".js$",
+    "excludePattern": "(node_modules|dist|build)"
+  },
+  "opts": {
+    "destination": "docs/logistics2",
+    "recurse": true,
+    "template": "templates/default"
+  }
+}

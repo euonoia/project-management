@@ -15,7 +15,24 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
+    "jsdoc": "^4.0.5",
     "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "typedoc": "^0.28.14",
+    "typedoc-plugin-markdown": "^4.9.0"
+  },
+  "scripts": {
+    "start": "node logistics2/api/server.js",
+
+    
+    "docs:backend": "npx jsdoc -c jsdoc.json",
+
+  
+    "docs:mobile": "npx typedoc",
+
+   
+    "docs:php": "php ./logistics2/vendor/bin/phpdoc --directory logistics2 --target docs/logistics2-php",
+
+    "docs:all": "npm run docs:backend && npm run docs:php && npm run docs:mobile"
   }
 }

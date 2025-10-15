@@ -1,0 +1,8 @@
+
+{
+  "entryPoints": ["app", "components", "hooks", "config", "constants"],
+  "out": "../../docs/logistics2-mobile",
+  "plugin": ["typedoc-plugin-markdown"],
+  "includeVersion": true,
+  "hideGenerator": true
+}
