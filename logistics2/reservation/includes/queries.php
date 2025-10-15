@@ -87,7 +87,24 @@ function get_user_reservations_history(PDO $dbh, $user_id, array $statuses = ['C
 
 // Fetch active reservation (not completed or cancelled)
 function get_active_reservation(PDO $dbh, $user_id) {
-    $stmt = $dbh->prepare('SELECT * FROM vehicle_reservations WHERE user_id = :uid AND status NOT IN ("Completed", "Cancelled") ORDER BY pickup_datetime DESC LIMIT 1');
+   $stmt = $dbh->prepare("
+    SELECT 
+    vrh.*,
+    v.model AS vehicle_model,
+    v.plate_number,
+    CONCAT(d.firstname, ' ', d.lastname) AS driver_name,
+    CONCAT(u.firstname, ' ', u.lastname) AS requester_name
+FROM vehicle_reservations_history vrh
+LEFT JOIN vehicles v 
+    ON vrh.vehicle_registration_id = v.registration_id
+LEFT JOIN users d 
+    ON v.user_id = d.user_id  -- driver
+LEFT JOIN users u 
+    ON vrh.user_id = u.user_id  -- requester
+ORDER BY vrh.trip_date DESC;
+
+");
+
     $stmt->execute([':uid' => $user_id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }

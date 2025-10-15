@@ -88,7 +88,12 @@
               <p class="font-semibold text-lg text-gray-900"><?= e($res['reservation_ref']) ?></p>
               <p class="text-gray-500 text-sm"><?= e(date('M d, Y', strtotime($res['trip_date']))) ?></p>
           </div>
-
+          <div class="flex items-center space-x-3">
+              <i class="fas fa-user text-blue-500 w-5 text-center"></i>
+              <span class="text-sm">
+                  <strong>Driver:</strong> <?= e($res['driver_name'] ?? 'Not assigned') ?>
+              </span>
+          </div>
           <!-- Trip Details -->
           <div class="space-y-3">
               <div class="flex items-center space-x-3">
