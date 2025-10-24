@@ -146,7 +146,7 @@ It includes key features such as the driver dashboard, assigned customer view, t
 ---
 
 ### Driver Dashboard
-Displays real-time driver information, active trips, and system notifications.
+Displays actived assigned trips and total earned(based on trip the driver trip cost)
 
 ![Driver Dashboard](docs/images/image-24.png)
 
@@ -189,6 +189,15 @@ The database is structured for efficiency, ensuring reliable data handling betwe
 ![Database](docs/images/image-28.png)
 
 ---
+## Conclusion
 
+The development of this system provided valuable hands-on experience in **full-stack web and mobile application development** using modern tools such as **node.js**, and **MySQL (XAMPP)**.  
+Through this project, I learned how to design, integrate, and manage various components—from frontend interfaces to backend services and database connectivity—while maintaining functionality within a localhost environment.  
+
+Building the Logistics 2 subsystem for the TNVS project strengthened my understanding of **system architecture, user interaction flow, and data management**.  
+It also enhanced my problem-solving skills, particularly in implementing real-time features such as **geo-location routing** and **automated trip assignments**.  
+
+Overall, this project marks a significant milestone in my learning journey as it reflects both the **technical knowledge** and **project management skills** essential for developing scalable, reliable systems in real-world scenarios.
+---
 **Developed by:** Ken Española 
 **Year:** 2025
