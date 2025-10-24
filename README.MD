@@ -173,13 +173,6 @@ Displays all completed trips associated with the logged-in driver for record-kee
 ![Trip History](docs/images/image-27.png)
 
 ---
-
-## Conclusion
-
-This project demonstrates the integration of **logistics management and transport services** through web and mobile technologies.  
-It highlights the application of **system design, automation, and full-stack development** within the context of Project Management.  
-The system serves as both a technical and academic achievement in my development journey.
----
 ## Database
 
 This system uses a **MySQL database** hosted on **XAMPP (localhost)** for managing all core data.  
