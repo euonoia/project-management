@@ -1,10 +1,15 @@
-LOGISTICS 2 in project management is a subsytem of a tnvs that is a project of our project management
-I have incorporated a web and mobile application for this both localhost but a turning point of my system development
-----------------------------------------------------------------------------------------------------------
+# Logistics 2 – TNVS Subsystem (Project Management)
+
+**Logistics 2** in Project Management is a subsystem of a **TNVS (Transport Network Vehicle Service)** project developed for our Project Management course.  
+This project integrates both **web and mobile applications**, developed in a **localhost environment**.  
+It represents a significant milestone in my system development journey.
+
+---
+
 THE LANDING PAGE OF THE SYSTEM
 
 ![landing-page](<docs/images/Screenshot (188)-1.png>)
-----------------------------------------------------------------------------------------------------------
+---
 SIGN IN & REGISTRATION
 
 ![sign-in](docs/images/image.png)
