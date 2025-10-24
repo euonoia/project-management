@@ -179,6 +179,14 @@ Displays all completed trips associated with the logged-in driver for record-kee
 This project demonstrates the integration of **logistics management and transport services** through web and mobile technologies.  
 It highlights the application of **system design, automation, and full-stack development** within the context of Project Management.  
 The system serves as both a technical and academic achievement in my development journey.
+---
+## Database
+
+This system uses a **MySQL database** hosted on **XAMPP (localhost)** for managing all core data.  
+It stores information such as user accounts, driver details, reservations, trip routes, and travel history.  
+The database is structured for efficiency, ensuring reliable data handling between the **web** and **mobile** applications.
+
+![Database](docs/images/image-28.png)
 
 ---
 
