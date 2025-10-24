@@ -1,4 +1,5 @@
 <?php
+session_name('user_session');
 include('../../database/connect.php');
 session_start();
 if (!isset($_SESSION['firstname']) && !isset($_SESSION['lastname']) && !isset($_SESSION['email'])) {
