@@ -140,7 +140,37 @@ The **Admin Side** provides system management and monitoring tools.
 
 ## Mobile Version (Driver Side)
 
-![Mobile Driver](docs/images/image-24.png)
+This section showcases the **mobile interface** designed specifically for drivers.  
+It includes key features such as the driver dashboard, assigned customer view, trip route with live geolocation, and trip history.
+
+---
+
+### Driver Dashboard
+Displays real-time driver information, active trips, and system notifications.
+
+![Driver Dashboard](docs/images/image-24.png)
+
+---
+
+### Assigned Customer
+Shows the passenger assigned to the driver, including pickup and destination details.
+
+![Assigned Customer](docs/images/image-25.png)
+
+---
+
+### Trip Route
+Provides a live route display powered by a built-in API using **latitude and longitude geolocation** for accurate tracking.  
+This feature was one of the most technically challenging parts of the project.
+
+![Trip Route](docs/images/image-26.png)
+
+---
+
+### Trip History
+Displays all completed trips associated with the logged-in driver for record-keeping and review.
+
+![Trip History](docs/images/image-27.png)
 
 ---
 
