@@ -57,7 +57,7 @@ Vehicle selection is automatically determined based on the availability and regi
 
 ## Schedule Selection
 
-![Schedule](docs/images/image-9.png)
+![Additional Info](docs/images/image-10.png)
 
 ---
 
@@ -65,8 +65,8 @@ Vehicle selection is automatically determined based on the availability and regi
 
 This section automatically displays the name of the currently logged-in user and includes a **trip description** field to prevent unnecessary inputs.
 
-![Additional Info](docs/images/image-10.png)
 
+![Schedule](docs/images/image-9.png)
 ---
 
 ## Transport Cost Analysis
